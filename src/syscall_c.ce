@@ -1,0 +1,9 @@
+//
+// Created by os on 5/22/22.
+//
+
+#include "../h/syscall_c.he"
+
+void* mem_alloc(size_t size) {}
+
+int mem_free(void*) {}
