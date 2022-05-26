@@ -14,15 +14,22 @@ public:
     int mem_free(void* address);
 
     friend int main();
+    friend void ispisListe(void* head);
+
+    /*  deleted functions should generally be public
+        as it results in better error messages      */
+    MemoryAllocator(MemoryAllocator const&) = delete;
+    void operator=(MemoryAllocator const&) = delete;
 
 private:
-    MemoryAllocator();
     struct BlockHeader
     {
         BlockHeader* next;
         BlockHeader* prev;
         size_t size;
     };
+
+    MemoryAllocator();
     BlockHeader* freeMemHead;
     BlockHeader* allocMemHead;
 

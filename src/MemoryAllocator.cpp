@@ -50,8 +50,8 @@ int MemoryAllocator::mem_free(void* address)
     putIntoOrderedList(blk, freeMemHead);
 
     // Try to merge with the previous and next segments
-    tryToJoin(blk->prev);
-    tryToJoin(blk);
+    //tryToJoin(blk->prev);
+    //tryToJoin(blk);
 
     return 0;
 }
