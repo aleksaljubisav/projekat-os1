@@ -4,7 +4,7 @@
 
 #include "../h/MemoryAllocator.hpp"
 
-// Singleton getter
+// Singleton getter (static)
 MemoryAllocator& MemoryAllocator::getInstance()
 {
     static MemoryAllocator instance;
@@ -12,21 +12,48 @@ MemoryAllocator& MemoryAllocator::getInstance()
 }
 
 // Class constructor
-MemoryAllocator::MemoryAllocator() : freeMemHead((BlockHeader*)(HEAP_START_ADDR)), allocMemHead(nullptr)
+MemoryAllocator::MemoryAllocator() :
+    freeMemHead(((BlockHeader*)(HEAP_START_ADDR))), allocMemHead(nullptr)
 {
-    //freeMemHead = (BlockHeader*)(HEAP_START_ADDR);
     freeMemHead->next = nullptr;
     freeMemHead->prev = nullptr;
     freeMemHead->size = (size_t)HEAP_END_ADDR - (size_t)HEAP_START_ADDR - sizeof(BlockHeader);
 }
 
-// freeMemHead initialization
-//MemoryAllocator::BlockHeader* MemoryAllocator::freeMemHead = nullptr;
+// Memory allocation
+void* MemoryAllocator::mem_alloc(size_t size)
+{
+    // Try to find an existing free block in list (first fit):
+    BlockHeader* blk = findFirstFit(size);
+    if(blk == nullptr) return nullptr; // If not found
 
-// allocMemHead initialization
-//MemoryAllocator::BlockHeader* MemoryAllocator::allocMemHead = nullptr;
+    // Get block from free memory list
+    getFromFreeList(blk, size);
 
-// First fit algorithm
+    // Put block in allocated memory list
+    putIntoOrderedList(blk, allocMemHead);
+
+    return (char*)blk + sizeof(BlockHeader);
+}
+
+// Memory deallocation
+int MemoryAllocator::mem_free(void* address)
+{
+    // Get block from allocated list
+    BlockHeader* blk = getFromAllocList(address);
+    if(!blk) return -1;
+
+    // Find where and insert the new segment after cur:
+    putIntoOrderedList(blk, freeMemHead);
+
+    // Try to merge with the previous and next segments
+    tryToJoin(blk->prev);
+    tryToJoin(blk);
+
+    return 0;
+}
+
+// Helper: First fit algorithm
 inline MemoryAllocator::BlockHeader* MemoryAllocator::findFirstFit(size_t size)
 {
     BlockHeader* blk = freeMemHead;
@@ -83,21 +110,7 @@ inline void MemoryAllocator::putIntoOrderedList(BlockHeader* blk, BlockHeader* &
     else head = blk;
 }
 
-// Memory allocation---------------------------------------------------------------------------------------
-void* MemoryAllocator::mem_alloc(size_t size)
-{
-    // Try to find an existing free block in list (first fit):
-    BlockHeader* blk = findFirstFit(size);
-    if(blk == nullptr) return nullptr; // If not found
 
-    // Get block from free memory list
-    getFromFreeList(blk, size);
-
-    // Put block in allocated memory list
-    putIntoOrderedList(blk, allocMemHead);
-
-    return (char*)blk + sizeof(BlockHeader);
-}
 
 // Helper: Try to join cur with the cur->next free segment:
 inline int MemoryAllocator::tryToJoin(BlockHeader* cur)
@@ -114,7 +127,7 @@ inline int MemoryAllocator::tryToJoin(BlockHeader* cur)
         return 0;
 }
 
-// Get block from allocated list
+// Helper: Get block from allocated list
 inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromAllocList(void* address)
 {
     BlockHeader* blk = allocMemHead;
@@ -130,22 +143,4 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromAllocList(void* add
     blk->prev = nullptr;
 
     return blk;
-}
-
-
-// Memory deallocation
-int MemoryAllocator::mem_free(void* address)
-{
-    // Get block from allocated list
-    BlockHeader* blk = getFromAllocList(address);
-    if(!blk) return -1;
-
-    // Find where and insert the new segment after cur:
-    putIntoOrderedList(blk, freeMemHead);
-
-    // Try to merge with the previous and next segments
-    tryToJoin(blk->prev);
-    tryToJoin(blk);
-
-    return 0;
 }
