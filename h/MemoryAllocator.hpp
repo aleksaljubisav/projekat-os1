@@ -26,9 +26,9 @@ private:
     BlockHeader* freeMemHead;
     BlockHeader* allocMemHead;
 
-    // Pomocne funkcije:
+    // Helpers:
     BlockHeader *findFirstFit(size_t size);
-    void getFromFreeList(BlockHeader *blk, size_t size);
+    void getFromFreeList(BlockHeader *blk, size_t size, size_t allocSize);
     static void putIntoOrderedList(BlockHeader *blk, BlockHeader* &head);
     static int tryToJoin(BlockHeader *cur);
     BlockHeader *getFromAllocList(void *address);

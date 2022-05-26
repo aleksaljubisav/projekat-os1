@@ -23,12 +23,15 @@ MemoryAllocator::MemoryAllocator() :
 // Memory allocation
 void* MemoryAllocator::mem_alloc(size_t size)
 {
+    if(!size) return nullptr; // If size is 0
+    size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
+
     // Try to find an existing free block in list (first fit):
-    BlockHeader* blk = findFirstFit(size);
-    if(blk == nullptr) return nullptr; // If not found
+    BlockHeader* blk = findFirstFit(allocSize);
+    if(!blk) return nullptr; // If not found
 
     // Get block from free memory list
-    getFromFreeList(blk, size);
+    getFromFreeList(blk, size, allocSize);
 
     // Put block in allocated memory list
     putIntoOrderedList(blk, allocMemHead);
@@ -54,23 +57,23 @@ int MemoryAllocator::mem_free(void* address)
 }
 
 // Helper: First fit algorithm
-inline MemoryAllocator::BlockHeader* MemoryAllocator::findFirstFit(size_t size)
+inline MemoryAllocator::BlockHeader* MemoryAllocator::findFirstFit(size_t allocSize)
 {
     BlockHeader* blk = freeMemHead;
     for(; blk!=nullptr; blk = blk->next)
-        if(blk->size >= size) break;
+        if(blk->size >= allocSize) break;
     return blk;
 }
 
 // Helper: Get block from the ordered free list
-inline void MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t size)
+inline void MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t size, size_t allocSize)
 {
-    size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
+    // size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
     size_t remainingSize = blk->size - allocSize;
     if(remainingSize >= sizeof(BlockHeader) + MEM_BLOCK_SIZE)
     {
         // A fragment remains
-        blk->size = size;
+        blk->size = allocSize;
         size_t offset = sizeof(BlockHeader) + allocSize;
         auto* newBlk = (BlockHeader*)((char*)blk + offset);
 
@@ -110,28 +113,11 @@ inline void MemoryAllocator::putIntoOrderedList(BlockHeader* blk, BlockHeader* &
     else head = blk;
 }
 
-
-
-// Helper: Try to join cur with the cur->next free segment:
-inline int MemoryAllocator::tryToJoin(BlockHeader* cur)
-{
-    if(!cur) return 0;
-    if(cur->next && (char*)cur + cur->size == (char*)(cur->next))
-    {
-        // Remove cur->next segment:
-        cur->size += cur->next->size;
-        cur->next = cur->next->next;
-        if(cur->next) cur->next->prev = cur;
-        return 1;
-    } else
-        return 0;
-}
-
 // Helper: Get block from allocated list
 inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromAllocList(void* address)
 {
     BlockHeader* blk = allocMemHead;
-    for(; blk!=nullptr && (char*)address != (char*)blk + blk->size; blk = blk->next);
+    for(; blk!=nullptr && (char*)address != (char*)blk + sizeof(BlockHeader); blk = blk->next);
     if(!blk) return nullptr;
 
     // Prevezivanje
@@ -143,4 +129,19 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromAllocList(void* add
     blk->prev = nullptr;
 
     return blk;
+}
+
+// Helper: Try to join cur with the cur->next free segment:
+inline int MemoryAllocator::tryToJoin(BlockHeader* cur)
+{
+    if(!cur) return 0;
+    if(cur->next && (char*)cur + sizeof(BlockHeader) + cur->size == (char*)(cur->next))
+    {
+        // Remove cur->next segment:
+        cur->size = cur->size + sizeof(BlockHeader) + cur->next->size;
+        cur->next = cur->next->next;
+        if(cur->next) cur->next->prev = cur;
+        return 1;
+    } else
+        return 0;
 }
