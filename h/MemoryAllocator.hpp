@@ -13,8 +13,6 @@ public:
     void* mem_alloc(size_t size);
     int mem_free(void* address);
 
-    friend int main();
-    friend void ispisListe(void* head);
 
     /*  deleted functions should generally be public
         as it results in better error messages      */

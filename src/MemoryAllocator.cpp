@@ -4,7 +4,7 @@
 
 #include "../h/MemoryAllocator.hpp"
 
-// Singleton getter (static)
+// Singleton getter
 MemoryAllocator& MemoryAllocator::getInstance()
 {
     static MemoryAllocator instance;
@@ -23,7 +23,7 @@ MemoryAllocator::MemoryAllocator() :
 // Memory allocation
 void* MemoryAllocator::mem_alloc(size_t size)
 {
-    if(!size) return nullptr; // If size is 0
+    if(size <= 0) return nullptr; // If size is less or equal to zero
     size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
 
     // Try to find an existing free block in list (first fit):
@@ -72,21 +72,6 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromFreeList(BlockHeade
     size_t remainingSize = blk->size - sizeof(BlockHeader) - allocSize;
     if(remainingSize >= sizeof(BlockHeader) + MEM_BLOCK_SIZE)
     {
-        /* A fragment remains
-        blk->size = allocSize;
-        size_t offset = sizeof(BlockHeader) + allocSize;
-        auto* newBlk = (BlockHeader*)((char*)blk + offset);
-
-        // Prevezivanje
-        if(blk->prev) blk->prev->next = newBlk;
-        else freeMemHead = newBlk;
-        newBlk->prev = blk->prev;
-        if(blk->next) blk->next->prev = newBlk;
-        newBlk->next = blk->next;
-
-        newBlk->size = remainingSize - sizeof(BlockHeader);*/
-
-        // Tacno---
         // A fragment remains
         BlockHeader* newBlk = blk;
         newBlk->size = newBlk->size - sizeof(BlockHeader) - allocSize;
