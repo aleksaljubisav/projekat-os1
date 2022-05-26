@@ -48,14 +48,15 @@ int main() {
 
     // DEALOCIRANJE:
     printString("DEALOCIRANJE \n");
+
     MA::getInstance().mem_free(two);
-    printString("Free lista posle dealociranja: ");
+    printString("\nFree lista posle dealociranja: ");
     ispisListe(MA::getInstance().freeMemHead);
     printString("Alloc lista posle dealociranja: ");
     ispisListe(MA::getInstance().allocMemHead);
 
-    MA::getInstance().mem_free(three);
-    printString("Free lista posle dealociranja: ");
+    MA::getInstance().mem_free(three)
+    printString("\nFree lista posle dealociranja: ");
     ispisListe(MA::getInstance().freeMemHead);
     printString("Alloc lista posle dealociranja: ");
     ispisListe(MA::getInstance().allocMemHead);

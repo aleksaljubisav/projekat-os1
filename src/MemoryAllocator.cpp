@@ -31,7 +31,7 @@ void* MemoryAllocator::mem_alloc(size_t size)
     if(!blk) return nullptr; // If not found
 
     // Get block from free memory list
-    getFromFreeList(blk, size, allocSize);
+    blk = getFromFreeList(blk, allocSize);
 
     // Put block in allocated memory list
     putIntoOrderedList(blk, allocMemHead);
@@ -42,6 +42,7 @@ void* MemoryAllocator::mem_alloc(size_t size)
 // Memory deallocation
 int MemoryAllocator::mem_free(void* address)
 {
+    if(!address) return -1;
     // Get block from allocated list
     BlockHeader* blk = getFromAllocList(address);
     if(!blk) return -1;
@@ -50,8 +51,8 @@ int MemoryAllocator::mem_free(void* address)
     putIntoOrderedList(blk, freeMemHead);
 
     // Try to merge with the previous and next segments
-    //tryToJoin(blk->prev);
-    //tryToJoin(blk);
+    tryToJoin(blk->prev);
+    tryToJoin(blk);
 
     return 0;
 }
@@ -66,13 +67,12 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::findFirstFit(size_t allocS
 }
 
 // Helper: Get block from the ordered free list
-inline void MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t size, size_t allocSize)
+inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t allocSize)
 {
-    // size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
-    size_t remainingSize = blk->size - allocSize;
+    size_t remainingSize = blk->size - sizeof(BlockHeader) - allocSize;
     if(remainingSize >= sizeof(BlockHeader) + MEM_BLOCK_SIZE)
     {
-        // A fragment remains
+        /* A fragment remains
         blk->size = allocSize;
         size_t offset = sizeof(BlockHeader) + allocSize;
         auto* newBlk = (BlockHeader*)((char*)blk + offset);
@@ -84,7 +84,18 @@ inline void MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t size, size
         if(blk->next) blk->next->prev = newBlk;
         newBlk->next = blk->next;
 
-        newBlk->size = remainingSize - sizeof(BlockHeader);
+        newBlk->size = remainingSize - sizeof(BlockHeader);*/
+
+        // Tacno---
+        // A fragment remains
+        BlockHeader* newBlk = blk;
+        newBlk->size = newBlk->size - sizeof(BlockHeader) - allocSize;
+        size_t offset = sizeof(BlockHeader) + newBlk->size;
+        blk = (BlockHeader*)((char*)newBlk + offset);
+
+        // Prevezivanje
+        blk->size = allocSize;
+
     } else
     {
         // No remaining fragment, allocate the entire block
@@ -94,6 +105,7 @@ inline void MemoryAllocator::getFromFreeList(BlockHeader* blk, size_t size, size
     }
     blk->next = nullptr;
     blk->prev = nullptr;
+    return blk;
 }
 
 // Helper: Put block into the ordered alloc list
@@ -122,7 +134,7 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::getFromAllocList(void* add
 
     // Prevezivanje
     if(blk->prev) blk->prev->next = blk->next;
-    else freeMemHead = blk->next;
+    else allocMemHead = blk->next;
     if(blk->next) blk->next->prev = blk->prev;
 
     blk->next = nullptr;
