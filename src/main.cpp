@@ -55,7 +55,7 @@ int main() {
     printString("Alloc lista posle dealociranja: ");
     ispisListe(MA::getInstance().allocMemHead);
 
-    MA::getInstance().mem_free(three)
+    MA::getInstance().mem_free(three);
     printString("\nFree lista posle dealociranja: ");
     ispisListe(MA::getInstance().freeMemHead);
     printString("Alloc lista posle dealociranja: ");
