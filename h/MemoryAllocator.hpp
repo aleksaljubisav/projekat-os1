@@ -13,6 +13,7 @@ public:
     void* mem_alloc(size_t size);
     int mem_free(void* address);
 
+    friend void ispisiListe();
 
     /*  deleted functions should generally be public
         as it results in better error messages      */

@@ -21,10 +21,10 @@ MemoryAllocator::MemoryAllocator() :
 }
 
 // Memory allocation
-void* MemoryAllocator::mem_alloc(size_t size)
+void* MemoryAllocator::mem_alloc(size_t allocSize)
 {
-    if(size <= 0) return nullptr; // If size is less or equal to zero
-    size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
+    if(allocSize <= 0) return nullptr; // If size is less or equal to zero
+    //size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
 
     // Try to find an existing free block in list (first fit):
     BlockHeader* blk = findFirstFit(allocSize);
