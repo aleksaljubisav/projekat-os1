@@ -29,20 +29,44 @@ inline void ispisiListe()
 
 int main()
 {
-    printString("ENTER\n");
 
     printString("POCETAN SLOBODAN PROSTOR end - start - BlockHeader = ");
     printInteger((uint64)HEAP_END_ADDR - (uint64)HEAP_START_ADDR - 24);
     __putc('\n');
 
+    printString("ENTER ALLOCATE\n");
+
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
     //MA::getInstance().mem_alloc(sizeof(int));
     //MA::getInstance().mem_alloc(5559);
-    printInteger((uint64)(mem_alloc(sizeof(int))));
-    __putc('\n');
-    printInteger((uint64)(mem_alloc(5559)));
-    __putc('\n');
+    void* zero = mem_alloc(134195264);
+    ispisiListe();
+    void* one = mem_alloc(sizeof(int));
+    ispisiListe();
+    void* two = mem_alloc(5559);
+    ispisiListe();
+    void* three = mem_alloc(sizeof(uint64) + 122);
+    ispisiListe();
+    void* four = mem_alloc(9999999999);
+    ispisiListe();
+
     printString("EXIT\n");
+
+    printString("ENTER DEALLOCATE\n");
+
+    printInteger(mem_free(zero));
+    __putc('\n');
+    printInteger(mem_free(one));
+    __putc('\n');
+    printInteger(mem_free(two));
+    __putc('\n');
+    printInteger(mem_free(three));
+    __putc('\n');
+    printInteger(mem_free(four));
+    __putc('\n');
+
+    printString("EXIT\n");
+
 
     ispisiListe();
 

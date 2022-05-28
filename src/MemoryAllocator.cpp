@@ -62,7 +62,7 @@ inline MemoryAllocator::BlockHeader* MemoryAllocator::findFirstFit(size_t allocS
 {
     BlockHeader* blk = freeMemHead;
     for(; blk!=nullptr; blk = blk->next)
-        if(blk->size >= allocSize) break;
+        if(blk->size >= allocSize + sizeof(BlockHeader)) break;
     return blk;
 }
 

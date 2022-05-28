@@ -32,6 +32,12 @@ void Riscv::handleSupervisorTrap()
             __asm__ volatile("mv %0, a1" : "=r" (brojBlokova));
             void* retValue = MemoryAllocator::getInstance().mem_alloc(brojBlokova * MEM_BLOCK_SIZE);
             __asm__ volatile("mv a0, %0" : : "r" (retValue));
+        } else if(kod == 0x02)
+        {
+            void* pointer;
+            __asm__ volatile("mv %0, a1" : "=r" (pointer));
+            int retValue = MemoryAllocator::getInstance().mem_free(pointer);
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));
         }
     }
 }
