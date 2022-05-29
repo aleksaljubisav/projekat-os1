@@ -5,6 +5,9 @@
 #ifndef PROJECT_BASE_REPOSITORY_LIST_H
 #define PROJECT_BASE_REPOSITORY_LIST_H
 
+#include "../lib/hw.h"
+#include "../h/MemoryAllocator.hpp"
+
 template<typename T>
 class List
 {
@@ -20,6 +23,16 @@ private:
     Elem *head, *tail;
 
 public:
+    void* operator new(size_t size)
+    {
+        void* p = MemoryAllocator::getInstance().mem_alloc(size);
+        return p;
+    }
+    void operator delete (void* p)
+    {
+        MemoryAllocator::getInstance().mem_free(p);
+    }
+
     List() : head(0), tail(0) {}
 
     List(const List<T> &) = delete;
