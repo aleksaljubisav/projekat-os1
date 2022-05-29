@@ -13,14 +13,16 @@ public:
     void operator delete (void* p);
 
     bool isFinished() const { return finished; }
-    void setFinished(bool finished) { CCB::finished = finished; }
+    void setFinished(bool f) { CCB::finished = finished; }
 
     using Body = void (*)();
 
     static CCB* createCoroutine(Body body);
 
-    friend class scheduler;
+    friend class Scheduler;
+
 private:
+    CCB* next;
     struct Context
     {
         uint64 ra;

@@ -5,20 +5,29 @@
 #ifndef PROJECT_BASE_REPOSITORY_SCHEDULER_H
 #define PROJECT_BASE_REPOSITORY_SCHEDULER_H
 
-#include "../h/list.h"
 
-class CCB;
+#include "../h/ccb.h"
 
+// Singleton
 class Scheduler
 {
-private:
-    static List<CCB> readyCoroutineQueue;
-
 public:
-    static CCB *get();
+    Scheduler& getInstance();
 
-    static void put(CCB *ccb);
+    CCB *get();
+    void put(CCB *ccb);
 
+    /*  deleted functions should generally be public
+    as it results in better error messages      */
+    Scheduler(Scheduler const&) = delete;
+    void operator=(Scheduler const&) = delete;
+
+private:
+    // Skriveni konstruktor
+    Scheduler() : readyQueueHead(nullptr), readyQueueTail(nullptr) {}
+
+    CCB* readyQueueHead;
+    CCB* readyQueueTail;
 };
 
 
