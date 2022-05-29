@@ -26,49 +26,47 @@ inline void ispisiListe()
 
 }
 
-
-int main()
+struct Test
 {
+    uint64 a;
+    uint64 b[500];
+};
 
+void main()
+{
     printString("POCETAN SLOBODAN PROSTOR end - start - BlockHeader = ");
     printInteger((uint64)HEAP_END_ADDR - (uint64)HEAP_START_ADDR - 24);
     __putc('\n');
-
+    ispisiListe();
     printString("ENTER ALLOCATE\n");
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    //MA::getInstance().mem_alloc(sizeof(int));
-    //MA::getInstance().mem_alloc(5559);
-    void* zero = mem_alloc(134195264);
+
+    int* zero = new int;
     ispisiListe();
-    void* one = mem_alloc(sizeof(int));
+    Test* one = new Test;
     ispisiListe();
-    void* two = mem_alloc(5559);
+    uint64 * two = new uint64;
     ispisiListe();
-    void* three = mem_alloc(sizeof(uint64) + 122);
+    Test* three = new Test;
     ispisiListe();
-    void* four = mem_alloc(9999999999);
+    char* four = new char;
     ispisiListe();
+
 
     printString("EXIT\n");
 
     printString("ENTER DEALLOCATE\n");
 
-    printInteger(mem_free(zero));
-    __putc('\n');
-    printInteger(mem_free(one));
-    __putc('\n');
-    printInteger(mem_free(two));
-    __putc('\n');
-    printInteger(mem_free(three));
-    __putc('\n');
-    printInteger(mem_free(four));
-    __putc('\n');
+    delete zero;
+    delete one;
+    delete two;
+    delete three;
+    delete four;
 
     printString("EXIT\n");
 
 
     ispisiListe();
 
-    return 0;
 }

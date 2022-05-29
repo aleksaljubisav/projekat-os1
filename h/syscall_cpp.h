@@ -7,7 +7,7 @@
 
 #include "syscall_c.h"
 
-void* ::operator new (size_t);
-void ::operator delete (void*);
+void* operator new (size_t size);
+void operator delete (void* p);
 
 #endif //PROJECT_BASE_SYSCALL_CPP_HE
