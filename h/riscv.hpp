@@ -15,10 +15,10 @@ public:
     //static void popSppSpie(); //
 
     // push x3..x31 registers on stack
-    //static void pushRegisters();
+    static void pushRegisters();
 
     // pop x3..x31 registers on stack
-    //static void popRegisters();
+    static void popRegisters();
 
     // read register scause
     static uint64 r_scause();
@@ -183,5 +183,6 @@ inline void Riscv::w_sstatus(uint64 sstatus)
 {
     __asm__ volatile ("csrw sstatus, %[sstatus]" : : [sstatus] "r"(sstatus));
 }
+
 
 #endif //PROJECT_BASE_REPOSITORY_RISCV_HPP

@@ -3,9 +3,10 @@
 //
 
 #include "../h/scheduler.h"
+#include "../h/ccb.h"
 
 // Singleton getter
-Scheduler& Scheduler::getInstance()
+    Scheduler& Scheduler::getInstance()
 {
     static Scheduler instance;
     return instance;

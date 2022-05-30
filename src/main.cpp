@@ -1,9 +1,11 @@
 #include "../h/MemoryAllocator.hpp"
-#include "../h/syscall_c.h"
+//#include "../h/syscall_c.h"
 #include "../h/riscv.hpp"
 #include "../h/print.hpp"
 #include "../lib/console.h"
 #include "../h/ccb.h"
+#include "../h/workers.h"
+#include "../lib/hw.h"
 
 typedef MemoryAllocator MA;
 
@@ -29,5 +31,33 @@ inline void ispisiListe()
 
 void main()
 {
+    ispisiListe();
+    CCB* coroutines[3];
+
+    coroutines[0] = CCB::createCoroutine(nullptr, nullptr);
+    CCB::running = coroutines[0];
+
+    ispisiListe();
+    coroutines[1] = CCB::createCoroutine(workerBodyA, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    printString("CoroutineA created\n");
+    ispisiListe();
+    coroutines[2] = CCB::createCoroutine(workerBodyB, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    printString("CoroutineB created\n");
+    ispisiListe();
+
+    while(!(coroutines[1]->isFinished() &&
+            coroutines[2]->isFinished() ))
+    {
+        CCB::yield();
+    }
+
+    for(auto &coroutine: coroutines)
+    {
+        //MA::getInstance().mem_free(coroutine);
+        delete coroutine;
+    }
+
+    printString("Finished\n");
+    ispisiListe();
 
 }
