@@ -19,9 +19,9 @@ void CCB::operator delete (void* p)
 
 CCB* CCB::running = nullptr;
 
-CCB* CCB::createCoroutine(Body body, void* stack)
+CCB* CCB::createCoroutine(Body body, void* arg, void* stack)
 {
-    return new CCB(body, stack); // nije iz syscall nego iz jezgra
+    return new CCB(body, arg, stack); // nije iz syscall nego iz jezgra
 }
 
 void CCB::yield()
@@ -38,4 +38,8 @@ void CCB::dispatch()
     running = Scheduler::getInstance().get();
 
     CCB::contextSwitch(&old->context, &running->context);
+}
+
+void CCB::threadWrapper() {
+    running->body(running->bodyArg);
 }

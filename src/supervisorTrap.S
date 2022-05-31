@@ -1,4 +1,4 @@
-.extern _ZN5Riscv20handleSupervisorTrapEv
+.extern _ZN5Riscv20handleSupervisorTrapEmmmmm
 
 .align 4
 .global _ZN5Riscv14supervisorTrapEv
@@ -10,7 +10,7 @@ _ZN5Riscv14supervisorTrapEv:
     sd x\index, \index * 8(sp)
     .endr
 
-    call _ZN5Riscv20handleSupervisorTrapEv
+    call _ZN5Riscv20handleSupervisorTrapEmmmmm
 
     sd a0,  10 * 8(sp)
     .irp index, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
