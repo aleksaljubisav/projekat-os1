@@ -1,3 +1,5 @@
+
+
 .global systemCall
 .type systemCall, @function
 systemCall:
@@ -7,5 +9,4 @@ systemCall:
         mv a1, a0
         mv a0, a5 # kod sistemskog poziva
         ecall
-
         ret

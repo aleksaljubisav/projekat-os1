@@ -8,6 +8,7 @@
 #include "../h/ccb.h"
 #include "../h/print.hpp"
 
+
 static uint64 fibonacci(uint64 n)
 {
     if (n == 0 || n == 1) { return n; }
@@ -48,7 +49,8 @@ void workerBodyA(void* arg)
         printString("\n");
     }
 
-    CCB::running->setFinished(true);
+    finishedA = true;
+    //CCB::running->setFinished(true);
     CCB::yield();
 }
 
@@ -78,6 +80,7 @@ void workerBodyB(void* arg)
         printString("\n");
     }
 
-    CCB::running->setFinished(true);
+    finishedB = true;
+    //CCB::running->setFinished(true);
     CCB::yield();
 }

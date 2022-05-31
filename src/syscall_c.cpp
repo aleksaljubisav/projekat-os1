@@ -43,8 +43,14 @@ int thread_create(thread_t* handle, void (*start_routine)(void*), void* arg)
     __asm__ volatile("mv a1, %0" : : "r" (handle));
     __asm__ volatile("li a0, 0x11"); // mora ovim redosledom
     __asm__ volatile("ecall"); */
-    return systemCall();
+    systemCall();
     /*int retValue;
     __asm__ volatile("mv %0, a0" : "=r" (retValue));
-    return retValue;*/
+    return retValue;*/return 0;
+}
+
+void thread_dispatch()
+{
+    __asm__ volatile("li a0, 0x13");
+    __asm__ volatile("ecall");
 }
