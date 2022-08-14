@@ -4,10 +4,10 @@
 #include "../h/print.hpp"
 #include "../lib/console.h"
 #include "../h/ccb.h"
-//#include "../h/workers.h"
+#include "../h/workers.h"
 #include "../lib/hw.h"
 
-/*typedef MemoryAllocator MA;
+typedef MemoryAllocator MA;
 
 inline void ispisiListe()
 {
@@ -27,17 +27,17 @@ inline void ispisiListe()
     }
     __putc('\n');
 
-}*/
+}
 
-void userMain();
+//void userMain();
 
 void main()
 {
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    userMain();
+    //userMain();
 
-    /*ispisiListe();
+    ispisiListe();
     thread_t coroutines[3];
 
     thread_create(&coroutines[0], nullptr, nullptr);
@@ -51,8 +51,11 @@ void main()
     printString("CoroutineB created\n");
     ispisiListe();
 
-    while (!(finishedA && finishedB))
+    while(!(coroutines[1]->isFinished() &&
+            coroutines[2]->isFinished() ))
+    {
         CCB::yield();
+    }
 
     for(auto &coroutine: coroutines)
     {
@@ -61,6 +64,6 @@ void main()
     }
 
     printString("Finished\n");
-    ispisiListe();*/
+    ispisiListe();
 
 }

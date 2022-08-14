@@ -17,7 +17,6 @@ typedef CCB* thread_t;
 int systemCall(); // za C API funkcije sa najvise 4 argumenta
 int thread_create(thread_t* handle, void (*start_routine)(void*), void* arg);
 
-void thread_dispatch();
 
 
 #ifdef __cplusplus

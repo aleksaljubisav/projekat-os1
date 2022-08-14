@@ -25,7 +25,6 @@ public:
 
 
     static void yield();
-    static void dispatch();
 
     static CCB* running;
 
@@ -59,6 +58,8 @@ private:
     static void threadWrapper();
 
     static void contextSwitch(Context* oldContext, Context* runningContext);
+
+    static void dispatch();
 };
 
 

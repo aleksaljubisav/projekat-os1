@@ -14,7 +14,7 @@
     // zelimo da se vratimo tamo gde ce ova funkcija i biti pozvana, na pocetak threadWrapper-a
 }*/
 
-void Riscv::handleSupervisorTrap()
+void Riscv::handleSupervisorTrap(unsigned long a0, unsigned long a1, unsigned long a2, unsigned long a3, unsigned long a4)
 {
     uint64 scause = r_scause();
     if(scause == 0x0000000000000009UL) // interrupt: no, cause code: environment call from S-mode (9)
@@ -23,58 +23,46 @@ void Riscv::handleSupervisorTrap()
         __asm__ volatile("addi s1, s1, 4");
         __asm__ volatile("csrw sepc, s1");
 
-        uint64 kod;
-        __asm__ volatile("mv %0, a0" : "=r" (kod));
+        uint64 kod = a0;
+        //__asm__ volatile("mv %0, a0" : "=r" (kod));
 
         if(kod == 0x01) // mem_alloc
         {
-            /*size_t brojBlokova = a1;
+            size_t brojBlokova = a1;
             void* retValue = MemoryAllocator::getInstance().mem_alloc(brojBlokova * MEM_BLOCK_SIZE);
-            __asm__ volatile("mv a0, %0" : : "r" (retValue));*/
-            size_t brojBlokova;
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));
+            /*size_t brojBlokova;
             __asm__ volatile("mv %0, a1" : "=r" (brojBlokova));
             void* retValue = MemoryAllocator::getInstance().mem_alloc(brojBlokova * MEM_BLOCK_SIZE);
-            __asm__ volatile("mv a0, %0" : : "r" (retValue));
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));*/
         } else if(kod == 0x02) // mem_free
         {
-            /*void* pointer = (void*)a1;
-            int retValue = MemoryAllocator::getInstance().mem_free(pointer);
-            __asm__ volatile("mv a0, %0" : : "r" (retValue));*/
-            void* pointer;
-            __asm__ volatile("mv %0, a1" : "=r" (pointer));
+            void* pointer = (void*)a1;
             int retValue = MemoryAllocator::getInstance().mem_free(pointer);
             __asm__ volatile("mv a0, %0" : : "r" (retValue));
+            /*void* pointer;
+            __asm__ volatile("mv %0, a1" : "=r" (pointer));
+            int retValue = MemoryAllocator::getInstance().mem_free(pointer);
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));*/
         } else if(kod == 0x11) // thread_create
         {
-            /*CCB** volatile handle = (CCB**)a1;
+            CCB** handle = (CCB**)a1;
             using Body = void (*)(void*);
-            Body volatile body = (Body)a2;
-            void* volatile arg = (void*)a3;
-            void* volatile stack_space = (void*)a4;
+            Body body = (Body)a2;
+            void* arg = (void*)a3;
+            void* stack_space = (void*)a4;
             *handle = CCB::createCoroutine(body, arg, stack_space);
-            if(*handle != nullptr) __asm__ volatile("li a0, 0");
-            else __asm__ volatile("li a0, -1");*/
-            uint64 frame_pointer;
-            __asm__ volatile("ld %0, -16(fp)" : "=r" (frame_pointer));
-            CCB** handle;
-            __asm__ volatile("ld %0, 11 * 8(%1)" : "=r" (handle) : "r" (frame_pointer));
+            __asm__ volatile("li a0, 1");///////////////////////
+            /*CCB** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
             using Body = void (*)(void*);
             Body body;
-            __asm__ volatile("ld %0, 12 * 8(%1)" : "=r" (body) : "r" (frame_pointer));
+            __asm__ volatile("mv %0, a2" : "=r" (body));
             void* arg;
-            __asm__ volatile("ld %0, 13 * 8(%1)" : "=r" (arg) : "r" (frame_pointer));
+            __asm__ volatile("mv %0, a3" : "=r" (arg));
             void* stack_space;
-            __asm__ volatile("ld %0, 14 * 8(%1)" : "=r" (stack_space) : "r" (frame_pointer));
+            __asm__ volatile("mv %0, a4" : "=r" (stack_space));*/
             *handle = CCB::createCoroutine(body, arg, stack_space);
-            if(*handle != nullptr) __asm__ volatile("li a0, 0");
-            else __asm__ volatile("li a0, -1");
-        } else if(kod == 0x13)
-        {
-            uint64 sepc = r_sepc();
-            uint64 sstatus = r_sstatus();
-            CCB::dispatch();
-            w_sstatus(sstatus);
-            w_sepc(sepc);
         }
     }
 }
