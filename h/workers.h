@@ -5,8 +5,8 @@
 #ifndef PROJECT_BASE_REPOSITORY_WORKERS_H
 #define PROJECT_BASE_REPOSITORY_WORKERS_H
 
-extern void workerBodyA(void* arg);
+extern void workerBodyA();
 
-extern void workerBodyB(void* arg);
+extern void workerBodyB();
 
 #endif //PROJECT_BASE_REPOSITORY_WORKERS_H

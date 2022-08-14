@@ -15,7 +15,7 @@ static uint64 fibonacci(uint64 n)
     return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-void workerBodyA(void* arg)
+void workerBodyA()
 {
     uint8 i = 0;
     for (; i < 3; i++)
@@ -52,7 +52,7 @@ void workerBodyA(void* arg)
     CCB::yield();
 }
 
-void workerBodyB(void* arg)
+void workerBodyB()
 {
     uint8 i = 10;
     for (; i < 13; i++)

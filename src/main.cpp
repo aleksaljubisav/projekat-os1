@@ -1,6 +1,6 @@
-#include "../h/riscv.hpp"
 #include "../h/MemoryAllocator.hpp"
-#include "../h/syscall_c.h"
+//#include "../h/syscall_c.h"
+#include "../h/riscv.hpp"
 #include "../h/print.hpp"
 #include "../lib/console.h"
 #include "../h/ccb.h"
@@ -29,25 +29,19 @@ inline void ispisiListe()
 
 }
 
-//void userMain();
-
 void main()
 {
-
-    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    //userMain();
-
     ispisiListe();
-    thread_t coroutines[3];
+    CCB* coroutines[3];
 
-    thread_create(&coroutines[0], nullptr, nullptr);
+    coroutines[0] = CCB::createCoroutine(nullptr, nullptr);
     CCB::running = coroutines[0];
 
     ispisiListe();
-    thread_create(&coroutines[1], workerBodyA, nullptr);
+    coroutines[1] = CCB::createCoroutine(workerBodyA, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
     printString("CoroutineA created\n");
     ispisiListe();
-    thread_create(&coroutines[2], workerBodyB, nullptr);
+    coroutines[2] = CCB::createCoroutine(workerBodyB, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
     printString("CoroutineB created\n");
     ispisiListe();
 

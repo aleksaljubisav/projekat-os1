@@ -88,7 +88,7 @@ public:
 private:
 
     // supervisor trap handler
-    static void handleSupervisorTrap(unsigned long a0, unsigned long a1, unsigned long a2, unsigned long a3, unsigned long a4);
+    static void handleSupervisorTrap();
 
 };
 
