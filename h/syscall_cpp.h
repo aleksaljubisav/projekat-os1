@@ -8,6 +8,6 @@
 #include "syscall_c.h"
 
 void* operator new (size_t size);
-void operator delete (void* p);
+void operator delete (void* p) noexcept;
 
 #endif //PROJECT_BASE_SYSCALL_CPP_HE

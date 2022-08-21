@@ -35,6 +35,9 @@ void main()
     CCB* coroutines[3];
 
     coroutines[0] = CCB::createCoroutine(nullptr, nullptr);
+    // telo main korutine se vec izvrsava, ne treba da krene da se izvrsava od maina
+    // main korutini ne treba stek jer ona implicitno vec ima stek na kom se izvrsava
+
     CCB::running = coroutines[0];
 
     ispisiListe();

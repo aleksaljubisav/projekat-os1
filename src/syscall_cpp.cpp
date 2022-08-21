@@ -9,7 +9,7 @@ void* operator new (size_t size)
     void* p = mem_alloc(size);
     return p;
 }
-void operator delete (void* p)
+void operator delete (void* p) noexcept
 {
     mem_free(p);
 }
