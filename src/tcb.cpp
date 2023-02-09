@@ -2,26 +2,26 @@
 // Created by os on 5/29/22.
 //
 
-#include "../h/ccb.h"
+#include "../h/tcb.h"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/riscv.hpp"
 
 // Preklapamo operatore da bismo mogli da kreiramo objekat bez syscall-a
-void* CCB::operator new(size_t size)
+void* TCB::operator new(size_t size)
 {
     void* p = MemoryAllocator::getInstance().mem_alloc(size);
     return p;
 }
-void CCB::operator delete (void* p) noexcept
+void TCB::operator delete (void* p) noexcept
 {
     MemoryAllocator::getInstance().mem_free(p);
 }
 
-CCB* CCB::running = nullptr;
+TCB* TCB::running = nullptr;
 
-CCB* CCB::createCoroutine(Body body, void* stack)
+TCB* TCB::createCoroutine(Body body, void* stack)
 {
-    return new CCB(body, stack); // nije iz syscall nego iz jezgra
+    return new TCB(body, stack); // nije iz syscall nego iz jezgra
 }
 
 
@@ -30,7 +30,7 @@ CCB* CCB::createCoroutine(Body body, void* stack)
     // da CPP prevodilac zna da ne treba da vrsi name mangling da bi dobio ispravno ime
     // ali ipak cemo da radimo sa name mangling-om
 
-void CCB::yield()
+void TCB::yield()
 {
     // korutina je mozda koristila te registre pre nego sto je predala procesor,
     // i mozda ce ih koristiti nakon sto joj procesor bude vracen
@@ -39,12 +39,12 @@ void CCB::yield()
     Riscv::popRegisters();
 }
 
-void CCB::dispatch()
+void TCB::dispatch()
 {
-    CCB *old = running;
+    TCB *old = running;
     if(!old->isFinished()) { Scheduler::getInstance().put(old); }
     running = Scheduler::getInstance().get();
 
-    CCB::contextSwitch(&old->context, &running->context);
+    TCB::contextSwitch(&old->context, &running->context);
     // za prvi parametar argument ce biti prosledjen kroz a0, a za drugi kroz a1
 }

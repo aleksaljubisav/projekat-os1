@@ -6,7 +6,7 @@
 #define PROJECT_BASE_REPOSITORY_SCHEDULER_H
 
 //#include "../h/ccb.h"
-class CCB;
+class TCB;
 
 // Singleton
 class Scheduler
@@ -14,8 +14,8 @@ class Scheduler
 public:
     static Scheduler& getInstance();
 
-    CCB *get();
-    void put(CCB *ccb);
+    TCB *get();
+    void put(TCB *ccb);
 
     /*  deleted functions should generally be pubSlic
     as it results in better error messages      */
@@ -26,8 +26,8 @@ private:
     // Skriveni konstruktor
     Scheduler() {}
 
-    CCB* readyQueueHead = nullptr;
-    CCB* readyQueueTail = nullptr;
+    TCB* readyQueueHead = nullptr;
+    TCB* readyQueueTail = nullptr;
 };
 
 

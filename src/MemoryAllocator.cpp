@@ -36,7 +36,7 @@ void* MemoryAllocator::mem_alloc(size_t size)
     // Put block in allocated memory list
     putIntoOrderedList(blk, allocMemHead);
 
-    return (char*)blk + sizeof(BlockHeader);
+    return (char*)blk + sizeof(BlockHeader); /// sizeof vraca broj bajtova, zbog toga cast-ujemo blk
 }
 
 // Memory deallocation

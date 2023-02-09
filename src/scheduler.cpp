@@ -3,7 +3,7 @@
 //
 
 #include "../h/scheduler.h"
-#include "../h/ccb.h"
+#include "../h/tcb.h"
 
 // Singleton getter
     Scheduler& Scheduler::getInstance()
@@ -13,11 +13,11 @@
 }
 
 // Remove first
-CCB* Scheduler::get()
+TCB* Scheduler::get()
 {
     if(!readyQueueHead) { return nullptr; }
 
-    CCB* cur = readyQueueHead;
+    TCB* cur = readyQueueHead;
     readyQueueHead = readyQueueHead->next;
     if(!readyQueueHead) { readyQueueTail = nullptr; }
 
@@ -25,7 +25,7 @@ CCB* Scheduler::get()
 }
 
 // Add last
-void Scheduler::put(CCB *ccb)
+void Scheduler::put(TCB *ccb)
 {
     if(readyQueueTail)
     {

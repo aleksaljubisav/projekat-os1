@@ -1,9 +1,9 @@
 #include "../h/MemoryAllocator.hpp"
-//#include "../h/syscall_c.h"
+#include "../h/syscall_c.h"
 #include "../h/riscv.hpp"
 #include "../h/print.hpp"
 #include "../lib/console.h"
-#include "../h/ccb.h"
+#include "../h/tcb.h"
 #include "../h/workers.h"
 #include "../lib/hw.h"
 
@@ -32,26 +32,27 @@ inline void ispisiListe()
 void main()
 {
     ispisiListe();
-    CCB* coroutines[3];
+    TCB* coroutines[3];
 
-    coroutines[0] = CCB::createCoroutine(nullptr, nullptr);
+    coroutines[0] = TCB::createCoroutine(nullptr, nullptr); /// alocira samo jedan blok od 64B za objekat klase
     // telo main korutine se vec izvrsava, ne treba da krene da se izvrsava od maina
     // main korutini ne treba stek jer ona implicitno vec ima stek na kom se izvrsava
 
-    CCB::running = coroutines[0];
+    TCB::running = coroutines[0];
 
     ispisiListe();
-    coroutines[1] = CCB::createCoroutine(workerBodyA, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+
+    coroutines[1] = TCB::createCoroutine(workerBodyC, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE))); // MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE)
     printString("CoroutineA created\n");
     ispisiListe();
-    coroutines[2] = CCB::createCoroutine(workerBodyB, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    coroutines[2] = TCB::createCoroutine(workerBodyD, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
     printString("CoroutineB created\n");
     ispisiListe();
 
     while(!(coroutines[1]->isFinished() &&
             coroutines[2]->isFinished() ))
     {
-        CCB::yield();
+        TCB::yield();
     }
 
     for(auto &coroutine: coroutines)

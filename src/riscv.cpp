@@ -22,7 +22,7 @@ void Riscv::handleSupervisorTrap()
         // interrupt: no, cause code: environment call from S-mode (9)
         __asm__ volatile("csrr s1, sepc");
         __asm__ volatile("addi s1, s1, 4");
-        __asm__ volatile("csrw sepc, s1");
+        __asm__ volatile("csrw sepc, s1"); // sepc dobija vrednost same ecall instrukcije
 
         uint64 kod;
         __asm__ volatile("mv %0, a0" : "=r" (kod));

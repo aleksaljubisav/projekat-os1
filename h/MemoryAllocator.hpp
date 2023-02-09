@@ -15,9 +15,10 @@ public:
 
     friend void ispisiListe();
 
+    /// brisemo kopirajuci konstruktor i operator= jer je klasa singleton
     /*  deleted functions should generally be public
         as it results in better error messages      */
-    MemoryAllocator(MemoryAllocator const&) = delete;
+    MemoryAllocator(MemoryAllocator const&) = delete; /// const moze levo ili desno od tipa
     void operator=(MemoryAllocator const&) = delete;
 
 private:
