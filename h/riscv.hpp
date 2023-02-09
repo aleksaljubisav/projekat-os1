@@ -12,7 +12,8 @@ class Riscv
 public:
     // neki vid pop-a, iako nije sa steka
     // pop sstatus.spp and sstatus.spie bits (HAS TO BE A NON INLINE FUNCTION)
-    //static void popSppSpie(); //
+    // zbog toga je stavljena u .cpp
+    static void popSppSpie(); //
 
     // push x3..x31 registers on stack
     static void pushRegisters();

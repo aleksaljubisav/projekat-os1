@@ -1,5 +1,5 @@
 #include "../h/MemoryAllocator.hpp"
-#include "../h/syscall_c.h"
+//#include "../h/syscall_c.h"
 #include "../h/riscv.hpp"
 #include "../h/print.hpp"
 #include "../lib/console.h"
@@ -31,37 +31,50 @@ inline void ispisiListe()
 
 void main()
 {
-    ispisiListe();
-    TCB* coroutines[3];
+    //ispisiListe();
+    TCB* threads[5];
 
-    coroutines[0] = TCB::createCoroutine(nullptr, nullptr); /// alocira samo jedan blok od 64B za objekat klase
+    threads[0] = TCB::createThread(nullptr, nullptr); /// alocira samo jedan blok od 64B za objekat klase
     // telo main korutine se vec izvrsava, ne treba da krene da se izvrsava od maina
     // main korutini ne treba stek jer ona implicitno vec ima stek na kom se izvrsava
 
-    TCB::running = coroutines[0];
+    TCB::running = threads[0];
 
-    ispisiListe();
+    //ispisiListe();
 
-    coroutines[1] = TCB::createCoroutine(workerBodyC, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE))); // MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE)
-    printString("CoroutineA created\n");
-    ispisiListe();
-    coroutines[2] = TCB::createCoroutine(workerBodyD, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
-    printString("CoroutineB created\n");
-    ispisiListe();
+    threads[1] = TCB::createThread(workerBodyA, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE))); // MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE)
+    printString("ThreadA created\n");
+    //ispisiListe();
+    threads[2] = TCB::createThread(workerBodyB, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    printString("ThreadB created\n");
+    //ispisiListe();
+    threads[3] = TCB::createThread(workerBodyC, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    printString("ThreadC created\n");
+    //ispisiListe();
+    threads[4] = TCB::createThread(workerBodyD, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)));
+    printString("ThreadD created\n");
+    //ispisiListe();
 
-    while(!(coroutines[1]->isFinished() &&
-            coroutines[2]->isFinished() ))
+    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+
+    while(!(threads[1]->isFinished() &&
+            threads[2]->isFinished() &&
+            threads[3]->isFinished() &&
+            threads[4]->isFinished()   ))
     {
         TCB::yield();
     }
 
-    for(auto &coroutine: coroutines)
+    for(auto &thread: threads)
     {
         //MA::getInstance().mem_free(coroutine);
-        delete coroutine;
+        delete thread;
     }
 
     printString("Finished\n");
-    ispisiListe();
+    //ispisiListe();
 
 }
+
+// u ispisivanju treba zabraniti prekide

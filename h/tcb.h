@@ -20,9 +20,10 @@ public:
 
     bool isFinished() const { return finished; }
     void setFinished(bool f) { TCB::finished = f; }
+    uint64 getTimeslice() const { return timeslice; }
 
     using Body = void (*)(); //pokazivac na funkciju koja nema argumente i nema povratnu vrednost
-    static TCB* createCoroutine(Body body, void* stack);
+    static TCB* createThread(Body body, void* stack);
 
     static void yield();
 
@@ -30,12 +31,13 @@ public:
 
     friend class Scheduler;
 private:
-    TCB(Body body, void* st) :
+    TCB(Body body, void* st, uint64 timeslice) :
             body(body),
             stack((uint64*)st), // pok. na posl. lok. (tehnicki na lok. nakon posl. za stek), u asembleru -8, a u C++-u -1 i onda se stavi elem
-            context({   body!= nullptr ? (uint64)body : 0, /// vrednost za ra neka u pocetku bude body
+            context({   (uint64) &threadWrapper, /// vrednost za ra neka u pocetku bude body
                         stack!=nullptr ? (uint64)stack : 0 /// vec imam adresu na lok. nakon posl. za stek, tako da cemo to da cast-ujemo
                     }),
+            timeslice(timeslice),
             finished(false)
     {
         if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
@@ -51,12 +53,19 @@ private:
     Body body;
     uint64* stack; //niz 64-obitnih vrednosti (jer se na steku uglavnom nalaze vrednosti iz registara)
     Context context; //registre x3-x31 ne cuvamo u kontrolnoj strukturi Context, vec na samom steku ove korutine
-    //uint64 timeslice;
+    uint64 timeslice;
     bool finished;
+
+    friend class Riscv;
+
+    static void threadWrapper();
 
     static void contextSwitch(Context* oldContext, Context* runningContext);
 
     static void dispatch();
+
+    static uint64 timeSliceCounter;
+    static uint64 constexpr TIME_SLICE = 2;
 };
 
 
