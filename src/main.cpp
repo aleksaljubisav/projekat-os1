@@ -8,6 +8,7 @@
 #include "../lib/hw.h"
 
 typedef MemoryAllocator MA;
+extern void userMain();
 
 inline void ispisiListe()
 {
@@ -31,6 +32,7 @@ inline void ispisiListe()
 
 void main()
 {
+
     //ispisiListe();
     TCB* threads[5];
 
@@ -56,7 +58,7 @@ void main()
     //ispisiListe();
 
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+    //Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     while(!(threads[1]->isFinished() &&
             threads[2]->isFinished() &&
