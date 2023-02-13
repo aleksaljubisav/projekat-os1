@@ -24,10 +24,10 @@ public:
 
 private:
     // Skriveni konstruktor
-    Scheduler() {}
+    Scheduler() : readyQueueHead(nullptr), readyQueueTail(nullptr) {}
 
-    TCB* readyQueueHead = nullptr;
-    TCB* readyQueueTail = nullptr;
+    TCB* readyQueueHead; //= nullptr;
+    TCB* readyQueueTail; //= nullptr;
 };
 
 

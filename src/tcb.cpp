@@ -5,6 +5,7 @@
 #include "../h/tcb.h"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/riscv.hpp"
+#include "../h/syscall_c.hpp"
 
 // Preklapamo operatore da bismo mogli da kreiramo objekat bez syscall-a
 void* TCB::operator new(size_t size)
@@ -21,9 +22,9 @@ TCB* TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB* TCB::createThread(Body body, void* stack)
+TCB* TCB::createThread(Body body, void* stack, void* args)
 {
-    return new TCB(body, stack, TIME_SLICE); // nije iz syscall nego iz jezgra
+    return new TCB(body, stack, TIME_SLICE, args); // nije iz syscall nego iz jezgra
 }
 
 
@@ -34,15 +35,16 @@ TCB* TCB::createThread(Body body, void* stack)
 
 void TCB::yield()
 {
-/*
+
     // korutina je mozda koristila te registre pre nego sto je predala procesor,
     // i mozda ce ih koristiti nakon sto joj procesor bude vracen
-    Riscv::pushRegisters(); // cuvamo registre x3-x31 (one koje nismo cuvali u strukturi Context)
-    dispatch();
-    Riscv::popRegisters();
-*/
+    //Riscv::pushRegisters(); // cuvamo registre x3-x31 (one koje nismo cuvali u strukturi Context)
+    //TCB::timeSliceCounter = 0;
+    //dispatch();
+    //Riscv::popRegisters();
 
-    __asm__ volatile ("ecall"); // exception
+
+    __asm__ volatile("ecall"); // exception
 }
 
 void TCB::dispatch()
@@ -62,9 +64,9 @@ void TCB::threadWrapper()
     //  SPP, SPIE
     Riscv::popSppSpie();// MORA CALL INSTRUKCIJOM JER MENJA REGISTAR ra
 
-    running->body();
+    running->body(running->args);
     running->setFinished(true);
 
-    TCB::yield();
+    yield();//TCB::yield();
     // threadWrapper nije pozvano na obican nacin, nema gde da se vrati
 }

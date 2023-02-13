@@ -6,7 +6,10 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../lib/console.h"
 #include "../h/tcb.h"
-#include "../h/print.hpp"
+//#include "../h/print.hpp"
+#include "../test/printing.hpp"
+#include "../h/syscall_c.hpp"
+
 
 void Riscv::popSppSpie()
 {
@@ -19,19 +22,67 @@ void Riscv::popSppSpie()
 void Riscv::handleSupervisorTrap()
 {
     uint64 scause = r_scause();
-    if(scause == 0x0000000000000009UL)
+    if(scause == 0x0000000000000008UL) {
+        // interrupt: no, cause code: environment call from U-mode (8)
+        uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
+
+        uint64 kod;
+        __asm__ volatile("mv %0, a0" : "=r" (kod));
+        if (kod == 0x01) {
+            size_t brojBlokova;
+            __asm__ volatile("mv %0, a1" : "=r" (brojBlokova));
+            uint64 retValue = (uint64) MemoryAllocator::getInstance().mem_alloc(brojBlokova * MEM_BLOCK_SIZE);
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));
+        } else if (kod == 0x02) {
+            void *pointer;
+            __asm__ volatile("mv %0, a1" : "=r" (pointer));
+            int retValue = MemoryAllocator::getInstance().mem_free(pointer);
+            __asm__ volatile("mv a0, %0" : : "r" (retValue));
+        } else if(kod == 0x11) // thread_create
+        {
+            void* args;
+            __asm__ volatile("mv %0, a3" : "=r" (args));
+            TCB::Body body;
+            __asm__ volatile("mv %0, a2" : "=r" (body));
+            TCB** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+
+            void* stek = MemoryAllocator::getInstance().mem_alloc(DEFAULT_STACK_SIZE);
+            if (!stek)
+            {
+                __asm__ volatile("li a0, -1");
+            } else {
+                (*handle) = (TCB::createThread(body, ((void *) ((char *)stek + DEFAULT_STACK_SIZE)), args));
+                __asm__ volatile("li a0, 0");
+            }
+        } else if(kod == 0x13) //19 to je thread_dispatch
+        {
+            uint64 sstatus = r_sstatus();
+            TCB::timeSliceCounter = 0;
+            TCB::dispatch();
+            w_sstatus(sstatus);
+        } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
+        {
+            Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
+        } else { // Yield iz U-mode
+            /*printString("\n Yield, a ne thread_dispatch() \n SCAUSE: ");
+            printInt(scause);
+            printString("\n STVAL: ");
+            printInt(r_stval());
+            printString("\n SEPC: ");
+            printInt(r_sepc());
+            printString("\n");*/
+            uint64 sstatus = r_sstatus();
+            TCB::timeSliceCounter = 0;
+            TCB::dispatch();
+            w_sstatus(sstatus);
+        }
+        w_sepc(sepc);
+    } else if(scause == 0x0000000000000009UL) // Yield iz S-mode
     {
         // interrupt: no, cause code: environment call from S-mode (9)
-        // sepc dobija vrednost SAME ECALL INSTRUKCIJE!!!
-        uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
-        uint64 sstatus = r_sstatus();
-        TCB::timeSliceCounter = 0;
-        TCB::dispatch();
-        w_sstatus(sstatus);
-        w_sepc(sepc);
-    } else if(scause == 0x0000000000000008UL)
-    {
-        // interrupt: no, cause code: environment call from U-mode (8)
+        // slicno kao i za prekid od tajmera, samo sto je ovo za yield
+
         // sepc dobija vrednost SAME ECALL INSTRUKCIJE!!!
         uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
         uint64 sstatus = r_sstatus();
@@ -61,18 +112,18 @@ void Riscv::handleSupervisorTrap()
     } else {
         // unexpected trap cause (trebalo bi da ispisemo scause na terminal, stval i sepc)
         printString("\n SCAUSE: ");
-        printInteger(scause);
+        printInt(scause);
         printString("\n STVAL: ");
-        printInteger(r_stval());
+        printInt(r_stval());
         printString("\n SEPC: ");
-        printInteger(r_sepc());
+        printInt(r_sepc());
         printString("\n");
     }
 
     /*
-    if(scause == 0x0000000000000009UL)
+    if(scause == 0x0000000000000008UL)
     {
-        // interrupt: no, cause code: environment call from S-mode (9)
+        // interrupt: no, cause code: environment call from U-mode (8)
         __asm__ volatile("csrr s1, sepc");
         __asm__ volatile("addi s1, s1, 4");
         __asm__ volatile("csrw sepc, s1"); // sepc dobija vrednost same ecall instrukcije

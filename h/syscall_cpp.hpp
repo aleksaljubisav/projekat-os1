@@ -5,7 +5,7 @@
 #ifndef PROJECT_BASE_SYSCALL_CPP_HE
 #define PROJECT_BASE_SYSCALL_CPP_HE
 
-#include "syscall_c.h"
+#include "syscall_c.hpp"
 
 void* operator new (size_t size);
 void operator delete (void* p) noexcept;

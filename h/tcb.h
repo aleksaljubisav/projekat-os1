@@ -22,8 +22,8 @@ public:
     void setFinished(bool f) { TCB::finished = f; }
     uint64 getTimeslice() const { return timeslice; }
 
-    using Body = void (*)(); //pokazivac na funkciju koja nema argumente i nema povratnu vrednost
-    static TCB* createThread(Body body, void* stack);
+    using Body = void (*)(void*); //pokazivac na funkciju koja nema argumente i nema povratnu vrednost //sad ima arg
+    static TCB* createThread(Body body, void* stack, void* args);
 
     static void yield();
 
@@ -31,8 +31,10 @@ public:
 
     friend class Scheduler;
 private:
-    TCB(Body body, void* st, uint64 timeslice) :
+    TCB(Body body, void* st, uint64 timeslice, void* args) :
+            next(nullptr),
             body(body),
+            args(args),
             stack((uint64*)st), // pok. na posl. lok. (tehnicki na lok. nakon posl. za stek), u asembleru -8, a u C++-u -1 i onda se stavi elem
             context({   (uint64) &threadWrapper, /// vrednost za ra neka u pocetku bude body
                         stack!=nullptr ? (uint64)stack : 0 /// vec imam adresu na lok. nakon posl. za stek, tako da cemo to da cast-ujemo
@@ -51,6 +53,7 @@ private:
         uint64 sp;
     };
     Body body;
+    void* args;
     uint64* stack; //niz 64-obitnih vrednosti (jer se na steku uglavnom nalaze vrednosti iz registara)
     Context context; //registre x3-x31 ne cuvamo u kontrolnoj strukturi Context, vec na samom steku ove korutine
     uint64 timeslice;
