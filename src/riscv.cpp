@@ -38,6 +38,31 @@ void Riscv::handleSupervisorTrap()
             __asm__ volatile("mv %0, a1" : "=r" (pointer));
             int retValue = MemoryAllocator::getInstance().mem_free(pointer);
             __asm__ volatile("mv a0, %0" : : "r" (retValue));
+        } else if(kod == 0x0F) // thread_create_only
+        {
+            void* args;
+            __asm__ volatile("mv %0, a3" : "=r" (args));
+            TCB::Body body;
+            __asm__ volatile("mv %0, a2" : "=r" (body));
+            TCB** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+
+            void* stek = MemoryAllocator::getInstance().mem_alloc(DEFAULT_STACK_SIZE);
+            if (!stek)
+            {
+                __asm__ volatile("li a0, -1");
+            } else {
+                (*handle) = (TCB::createThreadOnly(body, ((void *) ((char *)stek + DEFAULT_STACK_SIZE)), args));
+                __asm__ volatile("li a0, 0");
+            }
+        } else if(kod == 0x10) // thread_schedule_only
+        {
+            TCB** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+
+            int provera = (TCB::scheduleThreadOnly(*handle));
+            __asm__ volatile("mv a0, %0": : "r" (provera));
+
         } else if(kod == 0x11) // thread_create
         {
             void* args;

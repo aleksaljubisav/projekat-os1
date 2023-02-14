@@ -23,6 +23,8 @@ private:
 class TCB;
 typedef TCB* thread_t;
 int thread_create (thread_t* handle, void(*start_routine)(void*), void* arg); //kod 0x11
+int thread_create_only(thread_t* handle, void(*start_routine)(void*), void* arg);
+int thread_schedule_only(thread_t* handle);
 
 void thread_dispatch(); //kod 0x13
 

@@ -4,6 +4,7 @@
 #include "../h/syscall_c.hpp"
 
 #include "printing.hpp"
+#include "../h/MemoryAllocator.hpp"
 
 bool finishedA = false;
 bool finishedB = false;
@@ -90,6 +91,23 @@ void workerBodyD(void* arg) {
     thread_dispatch();
 }
 
+typedef MemoryAllocator MA;
+
+inline void ispisiListe() {
+    printString("Free lista: ");
+    for (MA::BlockHeader *cur = MA::getInstance().freeMemHead; cur; cur = cur->next) {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+
+    printString("Alloc lista: ");
+    for (MA::BlockHeader *cur = MA::getInstance().allocMemHead; cur; cur = cur->next) {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+}
 
 void Threads_C_API_test() {
     thread_t threads[4];
@@ -108,6 +126,7 @@ void Threads_C_API_test() {
     while (!(finishedA && finishedB && finishedC && finishedD)) {
         thread_dispatch();
     }
+
 
 }
 

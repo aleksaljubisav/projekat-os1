@@ -40,6 +40,29 @@ int thread_create (thread_t* handle, void(*start_routine)(void*), void* arg) //k
     return retValue;
 }
 
+int thread_create_only(thread_t* handle, void(*start_routine)(void*), void* arg)
+{
+    __asm__ volatile("mv a3, %0" : : "r" (arg));
+    __asm__ volatile("mv a2, %0" : : "r" (start_routine));
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 15"); // 0x0F
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+int thread_schedule_only(thread_t* handle)
+{
+
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 16"); // 0x10
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+
+}
+
 void thread_dispatch()
 {
     __asm__ volatile("li a0, 19"); //0x13

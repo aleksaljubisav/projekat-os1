@@ -6,6 +6,25 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.hpp"
+#include "../test/printing.hpp"
+
+typedef MemoryAllocator MA;
+
+inline void ispisiListe() {
+    printString("Free lista: ");
+    for (MA::BlockHeader *cur = MA::getInstance().freeMemHead; cur; cur = cur->next) {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+
+    printString("Alloc lista: ");
+    for (MA::BlockHeader *cur = MA::getInstance().allocMemHead; cur; cur = cur->next) {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+}
 
 // Preklapamo operatore da bismo mogli da kreiramo objekat bez syscall-a
 void* TCB::operator new(size_t size)
@@ -24,7 +43,19 @@ uint64 TCB::timeSliceCounter = 0;
 
 TCB* TCB::createThread(Body body, void* stack, void* args)
 {
+    TCB* t = new TCB(body, stack, TIME_SLICE, args); // nije iz syscall nego iz jezgra
+    if(body != nullptr) { Scheduler::getInstance().put(t); }
+    return t;
+}
+
+TCB* TCB::createThreadOnly(Body body, void* stack, void* args)
+{
     return new TCB(body, stack, TIME_SLICE, args); // nije iz syscall nego iz jezgra
+}
+int TCB::scheduleThreadOnly(TCB* t)
+{
+    if(t->getBody() != nullptr) { Scheduler::getInstance().put(t); return 0;}
+    return -1;
 }
 
 
@@ -66,6 +97,8 @@ void TCB::threadWrapper()
 
     running->body(running->args);
     running->setFinished(true);
+
+    delete running;
 
     yield();//TCB::yield();
     // threadWrapper nije pozvano na obican nacin, nema gde da se vrati

@@ -23,7 +23,11 @@ public:
     uint64 getTimeslice() const { return timeslice; }
 
     using Body = void (*)(void*); //pokazivac na funkciju koja nema argumente i nema povratnu vrednost //sad ima arg
+    Body getBody() const { return body; }
+
     static TCB* createThread(Body body, void* stack, void* args);
+    static TCB* createThreadOnly(Body body, void* stack, void* args);
+    static int scheduleThreadOnly(TCB* t);
 
     static void yield();
 
@@ -42,7 +46,8 @@ private:
             timeslice(timeslice),
             finished(false)
     {
-        if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
+        //if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
+        //prebacili smo u createThread
     }
 
     TCB* next;

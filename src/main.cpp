@@ -10,26 +10,26 @@
 
 typedef MemoryAllocator MA;
 extern void userMain(void*);
-/*
+
 inline void ispisiListe()
 {
     printString("Free lista: ");
     for(MA::BlockHeader* cur = MA::getInstance().freeMemHead; cur; cur = cur->next)
     {
-        printInteger(cur->size);
+        printInt(cur->size);
         printString(" - ");
     }
-    __putc('\n');
+    printString("\n");
 
     printString("Alloc lista: ");
     for(MA::BlockHeader* cur = MA::getInstance().allocMemHead; cur; cur = cur->next)
     {
-        printInteger(cur->size);
+        printInt(cur->size);
         printString(" - ");
     }
-    __putc('\n');
+    printString("\n");
 
-}*/
+}
 
 void main()
 {
@@ -52,13 +52,16 @@ void main()
     __asm__ volatile("li a0, 0xFF");
     __asm__ volatile("ecall");
 
-    for(auto &thread: threads)
+    delete threads[0];
+    delete threads[1];
+    /*for(auto &thread: threads)
     {
         //MA::getInstance().mem_free(coroutine);
         delete thread;
-    }
+    }*/
 
     printString("Finished\n");
+    ispisiListe();
 
     /*
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
