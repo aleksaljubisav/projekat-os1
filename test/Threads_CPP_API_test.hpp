@@ -2,6 +2,7 @@
 #define XV6_THREADS_CPP_API_TEST_HPP
 
 #include "../h/syscall_cpp.hpp"
+#include "../h/MemoryAllocator.hpp"
 
 #include "printing.hpp"
 
@@ -131,21 +132,47 @@ void WorkerD::workerBodyD(void* arg) {
     thread_dispatch();
 }
 
+typedef MemoryAllocator MA;
+
+inline void ispisiListe()
+{
+    printString("Free lista: ");
+    for(MA::BlockHeader* cur = MA::getInstance().freeMemHead; cur; cur = cur->next)
+    {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+
+    printString("Alloc lista: ");
+    for(MA::BlockHeader* cur = MA::getInstance().allocMemHead; cur; cur = cur->next)
+    {
+        printInt(cur->size);
+        printString(" - ");
+    }
+    printString("\n");
+
+}
+
 
 void Threads_CPP_API_test() {
     Thread* threads[4];
 
     threads[0] = new WorkerA();
     printString("ThreadA created\n");
+    ispisiListe();
 
     threads[1] = new WorkerB();
     printString("ThreadB created\n");
+    ispisiListe();
 
     threads[2] = new WorkerC();
     printString("ThreadC created\n");
+    ispisiListe();
 
     threads[3] = new WorkerD();
     printString("ThreadD created\n");
+    ispisiListe();
 
     for(int i=0; i<4; i++) {
         threads[i]->start();
@@ -155,7 +182,7 @@ void Threads_CPP_API_test() {
         Thread::dispatch();
     }
 
-    for (auto thread: threads) { delete thread; }
+    for (auto thread: threads) { delete thread; ispisiListe(); }
 }
 
 #endif //XV6_THREADS_CPP_API_TEST_HPP

@@ -40,6 +40,17 @@ int thread_create (thread_t* handle, void(*start_routine)(void*), void* arg) //k
     return retValue;
 }
 
+void thread_delete_only(thread_t* handle)
+{
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 14"); // 0x0E
+    __asm__ volatile("ecall");
+    //int retValue;
+    //__asm__ volatile("mv %0, a0" : "=r" (retValue));
+    //return retValue;
+
+}
+
 int thread_create_only(thread_t* handle, void(*start_routine)(void*), void* arg)
 {
     __asm__ volatile("mv a3, %0" : : "r" (arg));

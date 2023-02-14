@@ -82,7 +82,7 @@ void TCB::dispatch()
 {
     TCB *old = running;
     if(!old->isFinished()) { Scheduler::getInstance().put(old); }
-    else { delete running; }
+    //else { delete running; } ovo ne vaaaalja
     running = Scheduler::getInstance().get();
 
     TCB::contextSwitch(&old->context, &running->context);

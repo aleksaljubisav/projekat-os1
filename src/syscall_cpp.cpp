@@ -14,8 +14,7 @@ void operator delete (void* p) noexcept
     mem_free(p);
 }
 
-Thread::~Thread()
-{ }
+Thread::~Thread() { thread_delete_only(&myHandle); }
 
 Thread::Thread ()
 {
@@ -39,9 +38,6 @@ void Thread::threadWrapper(/*thread_t* handle, void (*body)(void*),*/ void* arg)
 {
     ((Thread*)arg)->run();
 }
-
-
-//Thread::~Thread ();
 
 void Thread::dispatch ()
 {

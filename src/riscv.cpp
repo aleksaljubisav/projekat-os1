@@ -37,6 +37,13 @@ void Riscv::handleSupervisorTrap()
             __asm__ volatile("mv %0, a1" : "=r" (pointer));
             int retValue = MemoryAllocator::getInstance().mem_free(pointer);
             __asm__ volatile("mv a0, %0" : : "r" (retValue));
+        } else if(kod == 0x0E) // thread(tcb)_delete_only
+        {
+            TCB** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+
+            delete *handle;
+
         } else if(kod == 0x0F) // thread_create_only
         {
             void* args;
