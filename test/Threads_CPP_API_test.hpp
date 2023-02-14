@@ -64,6 +64,7 @@ void WorkerA::workerBodyA(void *arg) {
             thread_dispatch();
         }
     }
+
     printString("A finished!\n");
     finishedA = true;
 }
@@ -76,6 +77,7 @@ void WorkerB::workerBodyB(void *arg) {
             thread_dispatch();
         }
     }
+
     printString("B finished!\n");
     finishedB = true;
     thread_dispatch();
@@ -89,7 +91,6 @@ void WorkerC::workerBodyC(void *arg) {
 
     printString("C: dispatch\n");
     __asm__ ("li t1, 7");
-    thread_dispatch();
 
     uint64 t1 = 0;
     __asm__ ("mv %[t1], t1" : [t1] "=r"(t1));

@@ -52,8 +52,9 @@ void main()
     __asm__ volatile("li a0, 0xFF");
     __asm__ volatile("ecall");
 
+
     delete threads[0];
-    delete threads[1];
+    //delete threads[1];
     /*for(auto &thread: threads)
     {
         //MA::getInstance().mem_free(coroutine);

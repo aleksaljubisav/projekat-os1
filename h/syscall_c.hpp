@@ -26,6 +26,8 @@ int thread_create (thread_t* handle, void(*start_routine)(void*), void* arg); //
 int thread_create_only(thread_t* handle, void(*start_routine)(void*), void* arg);
 int thread_schedule_only(thread_t* handle);
 
+int thread_exit (); // 0x12
+
 void thread_dispatch(); //kod 0x13
 
 

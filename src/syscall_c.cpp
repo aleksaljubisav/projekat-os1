@@ -63,6 +63,15 @@ int thread_schedule_only(thread_t* handle)
 
 }
 
+int thread_exit ()
+{
+    __asm__ volatile("li a0, 18"); // 0x12
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+
 void thread_dispatch()
 {
     __asm__ volatile("li a0, 19"); //0x13

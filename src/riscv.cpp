@@ -25,7 +25,6 @@ void Riscv::handleSupervisorTrap()
     if(scause == 0x0000000000000008UL) {
         // interrupt: no, cause code: environment call from U-mode (8)
         uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
-
         uint64 kod;
         __asm__ volatile("mv %0, a0" : "=r" (kod));
         if (kod == 0x01) {
@@ -80,15 +79,23 @@ void Riscv::handleSupervisorTrap()
                 (*handle) = (TCB::createThread(body, ((void *) ((char *)stek + DEFAULT_STACK_SIZE)), args));
                 __asm__ volatile("li a0, 0");
             }
+        } else if(kod == 0x12) //18 to je thread_exit
+        {
+            uint64 sstatus = r_sstatus();
+            TCB::running->setFinished(true);
+            TCB::dispatch();
+            w_sstatus(sstatus);
         } else if(kod == 0x13) //19 to je thread_dispatch
         {
             uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
             w_sstatus(sstatus);
+
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {
             Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
+
         } else { // Yield iz U-mode
             /*printString("\n Yield, a ne thread_dispatch() \n SCAUSE: ");
             printInt(scause);

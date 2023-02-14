@@ -82,6 +82,7 @@ void TCB::dispatch()
 {
     TCB *old = running;
     if(!old->isFinished()) { Scheduler::getInstance().put(old); }
+    else { delete running; }
     running = Scheduler::getInstance().get();
 
     TCB::contextSwitch(&old->context, &running->context);
@@ -96,10 +97,10 @@ void TCB::threadWrapper()
     Riscv::popSppSpie();// MORA CALL INSTRUKCIJOM JER MENJA REGISTAR ra
 
     running->body(running->args);
-    running->setFinished(true);
+    thread_exit();
 
-    delete running;
-
-    yield();//TCB::yield();
+    //running->setFinished(true);
+    //delete running;
+    //yield();//TCB::yield();
     // threadWrapper nije pozvano na obican nacin, nema gde da se vrati
 }

@@ -13,7 +13,7 @@
 // Thread Control Block
 class TCB {
 public:
-    ~TCB() { MemoryAllocator::getInstance().mem_free((char*)stack - DEFAULT_STACK_SIZE); }
+    ~TCB() { if(stack) {MemoryAllocator::getInstance().mem_free((char*)stack - DEFAULT_STACK_SIZE);} }
 
     void* operator new(size_t size);
     void operator delete (void* p) noexcept;
