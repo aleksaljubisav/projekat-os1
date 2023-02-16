@@ -66,14 +66,12 @@ int TCB::scheduleThreadOnly(TCB* t)
 
 void TCB::yield()
 {
-
     // korutina je mozda koristila te registre pre nego sto je predala procesor,
     // i mozda ce ih koristiti nakon sto joj procesor bude vracen
     //Riscv::pushRegisters(); // cuvamo registre x3-x31 (one koje nismo cuvali u strukturi Context)
     //TCB::timeSliceCounter = 0;
     //dispatch();
     //Riscv::popRegisters();
-
 
     __asm__ volatile("ecall"); // exception
 }
@@ -82,7 +80,7 @@ void TCB::dispatch()
 {
     TCB *old = running;
     if(!old->isFinished()) { Scheduler::getInstance().put(old); }
-    //else { delete running; } ovo ne vaaaalja
+
     running = Scheduler::getInstance().get();
 
     TCB::contextSwitch(&old->context, &running->context);

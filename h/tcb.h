@@ -34,6 +34,7 @@ public:
     static TCB* running;
 
     friend class Scheduler;
+    friend class Semaphore;
 private:
     TCB(Body body, void* st, uint64 timeslice, void* args) :
             next(nullptr),

@@ -4,8 +4,6 @@
 
 #include "../h/syscall_c.hpp"
 
-
-
 void* mem_alloc(size_t size) //0x01
 {
     //size_t allocSize = (size % MEM_BLOCK_SIZE == 0) ? size : (size + MEM_BLOCK_SIZE - size % MEM_BLOCK_SIZE);
@@ -64,7 +62,6 @@ int thread_create_only(thread_t* handle, void(*start_routine)(void*), void* arg)
 }
 int thread_schedule_only(thread_t* handle)
 {
-
     __asm__ volatile("mv a1, %0" : : "r" (handle));
     __asm__ volatile("li a0, 16"); // 0x10
     __asm__ volatile("ecall");
@@ -87,4 +84,50 @@ void thread_dispatch()
 {
     __asm__ volatile("li a0, 19"); //0x13
     __asm__ volatile("ecall");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Semaphore;
+typedef Semaphore* sem_t;
+
+int sem_open(sem_t* handle, unsigned init) //0x21
+{
+    __asm__ volatile("mv a2, %0" : : "r" (init));
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 33");
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+
+int sem_close(sem_t handle) //0x22
+{
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 34");
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+
+int sem_wait(sem_t id) //0x23
+{
+    __asm__ volatile("mv a1, %0" : : "r" (id));
+    __asm__ volatile("li a0, 35");
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+
+int sem_signal(sem_t id) //0x24
+{
+    __asm__ volatile("mv a1, %0" : : "r" (id));
+    __asm__ volatile("li a0, 36");
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
 }

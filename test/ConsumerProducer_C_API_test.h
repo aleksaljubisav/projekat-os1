@@ -7,7 +7,9 @@
 
 #include "../h/syscall_c.hpp"
 
-#include "buffer.hpp"
+#include "../test/buffer.hpp"
+#include "../test/printing.hpp"
+#include "../lib/console.h"
 
 sem_t waitForAll;
 
@@ -24,7 +26,7 @@ void producerKeyboard(void *arg) {
 
     int key;
     int i = 0;
-    while ((key = getc()) != 0x1b) {
+    while ((key = __getc()) != 0x1b) {
         data->buffer->put(key);
         i++;
 
@@ -63,20 +65,20 @@ void consumer(void *arg) {
         int key = data->buffer->get();
         i++;
 
-        putc(key);
+        __putc(key);
 
         if (i % (5 * data->id) == 0) {
             thread_dispatch();
         }
 
         if (i % 80 == 0) {
-            putc('\n');
+            __putc('\n');
         }
     }
 
     while (data->buffer->getCnt() > 0) {
         int key = data->buffer->get();
-        putc(key);
+        __putc(key);
     }
 
     sem_signal(data->wait);
@@ -125,7 +127,7 @@ void producerConsumer_C_API() {
         data[i].buffer = buffer;
         data[i].wait = waitForAll;
 
-        thread_create(threads + i,
+        thread_create(threads + 1,
                       i > 0 ? producer : producerKeyboard,
                       data + i);
     }

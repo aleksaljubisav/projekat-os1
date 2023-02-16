@@ -9,6 +9,7 @@
 //#include "../h/print.hpp"
 #include "../test/printing.hpp"
 #include "../h/syscall_c.hpp"
+#include "../h/Semaphore.h"
 
 
 void Riscv::popSppSpie()
@@ -99,6 +100,52 @@ void Riscv::handleSupervisorTrap()
             TCB::dispatch();
             w_sstatus(sstatus);
 
+        } else if(kod == 0x21) // sem_open
+        {
+            Semaphore** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+            unsigned init;
+            __asm__ volatile("mv %0, a2" : "=r" (init));
+
+
+            (*handle) = new Semaphore(init);
+            int provera;
+            if(!(*handle)) { provera = -1; }
+            else { provera = 0; }
+            __asm__ volatile("mv a0, %0": : "r" (provera));
+
+        } else if(kod == 0x22) // sem_close
+        {
+            Semaphore** handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
+
+            delete *handle; //JA MISLIM DA U DESKRIPTORU TREBAJU SVE NITI DA SE DEBLOKIRAJU
+
+            int provera = 0;
+            __asm__ volatile("mv a0, %0": : "r" (provera));
+
+        } else if(kod == 0x23) // sem_wait
+        {
+            uint64 sstatus = r_sstatus();
+            Semaphore** id;
+            __asm__ volatile("mv %0, a1" : "=r" (id));
+
+            (*id)->wait(); //treba da vrati 0 ili negativnu vrednost
+
+            int provera = 0;
+            __asm__ volatile("mv a0, %0": : "r" (provera));
+            w_sstatus(sstatus);
+        } else if(kod == 0x24) // sem_signal
+        {
+            uint64 sstatus = r_sstatus();
+            Semaphore** id;
+            __asm__ volatile("mv %0, a1" : "=r" (id));
+
+            (*id)->signal(); //treba da vrati 0 ili negativnu vrednost
+
+            int provera = 0;
+            __asm__ volatile("mv a0, %0": : "r" (provera));
+            w_sstatus(sstatus);
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {
             Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
@@ -132,7 +179,7 @@ void Riscv::handleSupervisorTrap()
     } else if(scause == 0x8000000000000001UL)
     {
         // interrupt: yes, cause code: supervisor software interrupt (timer)
-        TCB::timeSliceCounter++;
+        TCB::timeSliceCounter++;/*
         if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
             uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
@@ -142,7 +189,7 @@ void Riscv::handleSupervisorTrap()
             // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
             w_sstatus(sstatus);
             w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
-        }
+        }*/
         mc_sip(SIP_SSIP);
     } else if(scause == 0x8000000000000009UL)
     {

@@ -26,7 +26,6 @@ private:
     static void threadWrapper(/*thread_t* handle, void (*body)(void*),*/ void* arg);
 };
 
-/*
 class Semaphore {
 public:
     Semaphore (unsigned init = 1);
@@ -36,6 +35,8 @@ public:
 private:
     sem_t myHandle;
 };
+
+/*
 class PeriodicThread : public Thread {
 protected:
     PeriodicThread (time_t period);

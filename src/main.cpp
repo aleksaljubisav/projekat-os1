@@ -34,7 +34,7 @@ inline void ispisiListe()
 void main()
 {
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
-    ispisiListe();
+
     TCB* threads[2];
 
     threads[0] = TCB::createThread(nullptr, nullptr, nullptr);
@@ -62,7 +62,7 @@ void main()
     }*/
 
     printString("Finished\n");
-    ispisiListe();
+
 
     /*
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);

@@ -21,6 +21,7 @@ TCB* Scheduler::get()
     readyQueueHead = readyQueueHead->next;
     if(!readyQueueHead) { readyQueueTail = nullptr; }
 
+    cur->next = nullptr;/////////////naknadno sam dodao
     return cur;
 }
 
