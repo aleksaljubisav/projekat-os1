@@ -5,7 +5,7 @@
 #include "../h/tcb.h"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/riscv.hpp"
-#include "../h/syscall_c.hpp"
+#include "../h/syscall_c.h"
 #include "../test/printing.hpp"
 
 typedef MemoryAllocator MA;
@@ -94,6 +94,7 @@ void TCB::threadWrapper()
     //  SPP, SPIE
     Riscv::popSppSpie();// MORA CALL INSTRUKCIJOM JER MENJA REGISTAR ra
 
+    //sve ispod popSppSpie je user rezim
     running->body(running->args);
     thread_exit();
 

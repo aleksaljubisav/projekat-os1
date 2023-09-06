@@ -20,6 +20,10 @@ MemoryAllocator::MemoryAllocator() :
     freeMemHead->size = (size_t)HEAP_END_ADDR - (size_t)HEAP_START_ADDR - sizeof(BlockHeader);
 }
 
+//mem_alloc i mem_free reseni uz pomoc sledecih zadataka sa kolokvijuma:
+//1. zadatak, kolokvijum, avgust 2021.
+//2. zadatak, drugi kolokvijum, septembar 2015.
+
 // Memory allocation
 void* MemoryAllocator::mem_alloc(size_t size)
 {

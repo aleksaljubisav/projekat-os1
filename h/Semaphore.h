@@ -10,19 +10,19 @@
 
 class TCB;
 
-class Semaphore {
+class Sem {
 public:
     void* operator new(size_t size);
     void operator delete (void* p) noexcept;
 
-    Semaphore (unsigned init=1) : val(init), blockedQueueHead(nullptr), blockedQueueTail(nullptr) {}
+    Sem (unsigned init=1) : val(init), blockedQueueHead(nullptr), blockedQueueTail(nullptr) {}
     void wait ();
     void signal ();
     int value () const { return val; }
     TCB *get();
     void put(TCB *ccb);
 
-    ~Semaphore() { }; //MISLIM DA SVE NITI TREBA DA SE DEBLOKIRAJU I DA WAIT VRATI GRESKU
+    ~Sem() { }; //MISLIM DA SVE NITI TREBA DA SE DEBLOKIRAJU I DA WAIT VRATI GRESKU
 
 protected:
     void block ();
@@ -35,5 +35,12 @@ private:
 };
 //int lck = 0; // lock
 
+
+/*
+class _sem {
+private:
+    Semaphore* impl;
+};
+*/
 
 #endif //PROJECT_BASE_REPOSITORY_SEMAPHORE_H

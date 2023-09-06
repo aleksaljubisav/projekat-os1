@@ -2,31 +2,31 @@
 // Created by os on 5/18/22.
 //
 
-#include "printing.hpp"
+#include "../h/printingSys.h"
 
-uint64 lockPrint = 0;
+//uint64 lockPrint = 0;
 
-#define LOCK() while(copy_and_swap(lockPrint, 0, 1)) thread_dispatch()
-#define UNLOCK() while(copy_and_swap(lockPrint, 1, 0))
+//#define LOCK() while(copy_and_swap(lockPrint, 0, 1))
+//#define UNLOCK() while(copy_and_swap(lockPrint, 1, 0))
 
-void printString(char const *string)
+void printStringSys(char const *string)
 {
-    LOCK();
+    //LOCK();
     while (*string != '\0')
     {
-        putc(*string);
+        __putc(*string);
         string++;
     }
-    UNLOCK();
+    //UNLOCK();
 }
 
-char* getString(char *buf, int max) {
-    LOCK();
+char* getStringSys(char *buf, int max) {
+    //LOCK();
     int i, cc;
     char c;
 
     for(i=0; i+1 < max; ){
-        cc = getc();
+        cc = __getc();
         if(cc < 1)
             break;
         c = cc;
@@ -36,11 +36,11 @@ char* getString(char *buf, int max) {
     }
     buf[i] = '\0';
 
-    UNLOCK();
+    //UNLOCK();
     return buf;
 }
 
-int stringToInt(const char *s) {
+int stringToIntSys(const char *s) {
     int n;
 
     n = 0;
@@ -49,11 +49,11 @@ int stringToInt(const char *s) {
     return n;
 }
 
-char digits[] = "0123456789ABCDEF";
+char digitsSys[] = "0123456789ABCDEF";
 
-void printInt(int xx, int base, int sgn)
+void printIntSys(int xx, int base, int sgn)
 {
-    LOCK();
+    //LOCK();
     char buf[16];
     int i, neg;
     uint x;
@@ -68,13 +68,13 @@ void printInt(int xx, int base, int sgn)
 
     i = 0;
     do{
-        buf[i++] = digits[x % base];
+        buf[i++] = digitsSys[x % base];
     }while((x /= base) != 0);
     if(neg)
         buf[i++] = '-';
 
     while(--i >= 0)
-        putc(buf[i]);
+        __putc(buf[i]);
 
-    UNLOCK();
+    //UNLOCK();
 }

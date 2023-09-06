@@ -8,7 +8,7 @@
 #include "../h/tcb.h"
 //#include "../h/print.hpp"
 #include "../test/printing.hpp"
-#include "../h/syscall_c.hpp"
+#include "../h/syscall_c.h"
 #include "../h/Semaphore.h"
 
 
@@ -102,13 +102,13 @@ void Riscv::handleSupervisorTrap()
 
         } else if(kod == 0x21) // sem_open
         {
-            Semaphore** handle;
+            Sem** handle;
             __asm__ volatile("mv %0, a1" : "=r" (handle));
             unsigned init;
             __asm__ volatile("mv %0, a2" : "=r" (init));
 
 
-            (*handle) = new Semaphore(init);
+            (*handle) = new Sem(init);
             int provera;
             if(!(*handle)) { provera = -1; }
             else { provera = 0; }
@@ -116,7 +116,7 @@ void Riscv::handleSupervisorTrap()
 
         } else if(kod == 0x22) // sem_close
         {
-            Semaphore** handle;
+            Sem** handle;
             __asm__ volatile("mv %0, a1" : "=r" (handle));
 
             delete *handle; //JA MISLIM DA U DESKRIPTORU TREBAJU SVE NITI DA SE DEBLOKIRAJU
@@ -127,7 +127,7 @@ void Riscv::handleSupervisorTrap()
         } else if(kod == 0x23) // sem_wait
         {
             uint64 sstatus = r_sstatus();
-            Semaphore** id;
+            Sem** id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
             (*id)->wait(); //treba da vrati 0 ili negativnu vrednost
@@ -138,13 +138,30 @@ void Riscv::handleSupervisorTrap()
         } else if(kod == 0x24) // sem_signal
         {
             uint64 sstatus = r_sstatus();
-            Semaphore** id;
+            Sem** id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
             (*id)->signal(); //treba da vrati 0 ili negativnu vrednost
 
             int provera = 0;
             __asm__ volatile("mv a0, %0": : "r" (provera));
+            w_sstatus(sstatus);
+        } else if(kod == 0x41) // char getc();
+        {
+            uint64 sstatus = r_sstatus();
+
+            char ret = __getc();
+
+            __asm__ volatile("mv a0, %0": : "r" (ret));
+            w_sstatus(sstatus);
+        } else if(kod == 0x42) // void put(char);
+        {
+            uint64 sstatus = r_sstatus();
+            char c;
+            __asm__ volatile("mv %0, a1" : "=r" (c));
+
+            __putc(c);
+
             w_sstatus(sstatus);
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {

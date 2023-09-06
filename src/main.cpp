@@ -5,23 +5,23 @@
 #include "../h/tcb.h"
 //#include "../h/workers.h"
 #include "../lib/hw.h"
-#include "../h/syscall_c.hpp"
-#include "../test/printing.hpp"
+#include "../h/syscall_c.h"
+#include "../h/printingSys.h"
 
 typedef MemoryAllocator MA;
-extern void userMain(void*);
-
+extern void userMain();
+/*
 inline void ispisiListe()
 {
-    printString("Free lista: ");
+    printStringSys("Free lista: ");
     for(MA::BlockHeader* cur = MA::getInstance().freeMemHead; cur; cur = cur->next)
     {
         printInt(cur->size);
         printString(" - ");
     }
-    printString("\n");
+    printStringSys("\n");
 
-    printString("Alloc lista: ");
+    printStringSys("Alloc lista: ");
     for(MA::BlockHeader* cur = MA::getInstance().allocMemHead; cur; cur = cur->next)
     {
         printInt(cur->size);
@@ -29,6 +29,11 @@ inline void ispisiListe()
     }
     printString("\n");
 
+}
+*/
+void wrapperUserMain(void* arg)
+{
+    userMain();
 }
 
 void main()
@@ -40,8 +45,8 @@ void main()
     threads[0] = TCB::createThread(nullptr, nullptr, nullptr);
     TCB::running = threads[0];
 
-    threads[1] = TCB::createThread(userMain, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
-    printString("Thread userMain created\n");
+    threads[1] = TCB::createThread(wrapperUserMain, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
+    printStringSys("Thread userMain created\n");
 
     while(!(threads[1]->isFinished()))
     {
@@ -51,8 +56,6 @@ void main()
     //vracanje u sistemski rezim
     __asm__ volatile("li a0, 0xFF");
     __asm__ volatile("ecall");
-
-
     delete threads[0];
     delete threads[1];
     /*for(auto &thread: threads)
@@ -61,7 +64,7 @@ void main()
         delete thread;
     }*/
 
-    printString("Finished\n");
+    printStringSys("Finished\n");
 
 
     /*

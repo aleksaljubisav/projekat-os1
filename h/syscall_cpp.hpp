@@ -5,7 +5,7 @@
 #ifndef PROJECT_BASE_SYSCALL_CPP_HE
 #define PROJECT_BASE_SYSCALL_CPP_HE
 
-#include "syscall_c.hpp"
+#include "syscall_c.h"
 
 void* operator new (size_t size);
 void operator delete (void* p) noexcept;
@@ -42,10 +42,12 @@ protected:
     PeriodicThread (time_t period);
     virtual void periodicActivation () {}
 };
+*/
+
 class Console {
 public:
     static char getc ();
     static void putc (char);
 };
-*/
+
 #endif //PROJECT_BASE_SYSCALL_CPP_HE

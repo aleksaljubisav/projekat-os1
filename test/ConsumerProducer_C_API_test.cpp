@@ -1,17 +1,9 @@
-//
-// Created by os on 4/17/22.
-//
 
-#ifndef XV6_CONSUMERPRODUCER_C_API_TEST_H
-#define XV6_CONSUMERPRODUCER_C_API_TEST_H
+#include "../h/syscall_c.h"
 
-#include "../h/syscall_c.hpp"
+#include "buffer.hpp"
 
-#include "../test/buffer.hpp"
-#include "../test/printing.hpp"
-#include "../lib/console.h"
-
-sem_t waitForAll;
+static sem_t waitForAll;
 
 struct thread_data {
     int id;
@@ -19,14 +11,14 @@ struct thread_data {
     sem_t wait;
 };
 
-volatile int threadEnd = 0;
+static volatile int threadEnd = 0;
 
-void producerKeyboard(void *arg) {
+static void producerKeyboard(void *arg) {
     struct thread_data *data = (struct thread_data *) arg;
 
     int key;
     int i = 0;
-    while ((key = __getc()) != 0x1b) {
+    while ((key = getc()) != 0x1b) {
         data->buffer->put(key);
         i++;
 
@@ -41,7 +33,7 @@ void producerKeyboard(void *arg) {
     sem_signal(data->wait);
 }
 
-void producer(void *arg) {
+static void producer(void *arg) {
     struct thread_data *data = (struct thread_data *) arg;
 
     int i = 0;
@@ -57,7 +49,7 @@ void producer(void *arg) {
     sem_signal(data->wait);
 }
 
-void consumer(void *arg) {
+static void consumer(void *arg) {
     struct thread_data *data = (struct thread_data *) arg;
 
     int i = 0;
@@ -65,20 +57,20 @@ void consumer(void *arg) {
         int key = data->buffer->get();
         i++;
 
-        __putc(key);
+        putc(key);
 
         if (i % (5 * data->id) == 0) {
             thread_dispatch();
         }
 
         if (i % 80 == 0) {
-            __putc('\n');
+            putc('\n');
         }
     }
 
     while (data->buffer->getCnt() > 0) {
         int key = data->buffer->get();
-        __putc(key);
+        putc(key);
     }
 
     sem_signal(data->wait);
@@ -127,7 +119,7 @@ void producerConsumer_C_API() {
         data[i].buffer = buffer;
         data[i].wait = waitForAll;
 
-        thread_create(threads + 1,
+        thread_create(threads + i,
                       i > 0 ? producer : producerKeyboard,
                       data + i);
     }
@@ -143,5 +135,3 @@ void producerConsumer_C_API() {
     delete buffer;
 
 }
-
-#endif //XV6_CONSUMERPRODUCER_C_API_TEST_H

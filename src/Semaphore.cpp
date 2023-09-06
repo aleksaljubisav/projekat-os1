@@ -6,17 +6,17 @@
 #include "../h/tcb.h"
 
 // Preklapamo operatore da bismo mogli da kreiramo objekat bez syscall-a
-void* Semaphore::operator new(size_t size)
+void* Sem::operator new(size_t size)
 {
     void* p = MemoryAllocator::getInstance().mem_alloc(size);
     return p;
 }
-void Semaphore::operator delete(void* p) noexcept
+void Sem::operator delete(void* p) noexcept
 {
     MemoryAllocator::getInstance().mem_free(p);
 }
 
-void Semaphore::block () {
+void Sem::block () {
         TCB *old = TCB::running;
         put(old); //stavljamo u blocked queue
 
@@ -24,18 +24,18 @@ void Semaphore::block () {
 
         TCB::contextSwitch(&old->context, &TCB::running->context);
 }
-void Semaphore::unblock () {
+void Sem::unblock () {
     TCB* t = get();
     Scheduler::getInstance().put(t);
 }
-void Semaphore::wait () {
+void Sem::wait () {
     if (--val<0) block();
 }
-void Semaphore::signal () {
+void Sem::signal () {
     if (++val<=0) unblock();
 }
 
-TCB *Semaphore::get()
+TCB *Sem::get()
 {
     if(!blockedQueueHead) { return nullptr; }
 
@@ -46,7 +46,7 @@ TCB *Semaphore::get()
     cur->next = nullptr;/////////naknadno sam dodao
     return cur;
 }
-void Semaphore::put(TCB *ccb)
+void Sem::put(TCB *ccb)
 {
     if(blockedQueueTail)
     {

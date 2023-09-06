@@ -2,7 +2,7 @@
 // Created by os on 5/22/22.
 //
 
-#include "../h/syscall_c.hpp"
+#include "../h/syscall_c.h"
 
 void* mem_alloc(size_t size) //0x01
 {
@@ -88,8 +88,6 @@ void thread_dispatch()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Semaphore;
-typedef Semaphore* sem_t;
 
 int sem_open(sem_t* handle, unsigned init) //0x21
 {
@@ -130,4 +128,20 @@ int sem_signal(sem_t id) //0x24
     int retValue;
     __asm__ volatile("mv %0, a0" : "=r" (retValue));
     return retValue;
+}
+
+char getc()
+{
+    __asm__ volatile("li a0, 65"); //0x41
+    __asm__ volatile("ecall");
+    char retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
+}
+
+void putc(char c)
+{
+    __asm__ volatile("mv a1, %0" : : "r" (c));
+    __asm__ volatile("li a0, 66"); //0x42
+    __asm__ volatile("ecall");
 }
