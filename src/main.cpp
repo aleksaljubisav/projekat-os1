@@ -36,9 +36,17 @@ void wrapperUserMain(void* arg)
     userMain();
 }
 
+static void idleThreadBody(void* arg)
+{
+    while (true) {
+        //printStringSys("O");
+    }
+}
+
 void main()
 {
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    //Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     TCB* threads[2];
 
@@ -47,6 +55,9 @@ void main()
 
     threads[1] = TCB::createThread(wrapperUserMain, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
     printStringSys("Thread userMain created\n");
+
+    TCB* idle = TCB::createThread(idleThreadBody, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
+    TCB::idleThread = idle;
 
     while(!(threads[1]->isFinished()))
     {

@@ -7,7 +7,7 @@
 #include "../lib/console.h"
 #include "../h/tcb.h"
 //#include "../h/print.hpp"
-#include "../test/printing.hpp"
+#include "../h/printingSys.h"
 #include "../h/syscall_c.h"
 #include "../h/Semaphore.h"
 
@@ -196,7 +196,8 @@ void Riscv::handleSupervisorTrap()
     } else if(scause == 0x8000000000000001UL)
     {
         // interrupt: yes, cause code: supervisor software interrupt (timer)
-        TCB::timeSliceCounter++;/*
+        TCB::timeSliceCounter++;
+
         if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
             uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
@@ -206,21 +207,24 @@ void Riscv::handleSupervisorTrap()
             // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
             w_sstatus(sstatus);
             w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
-        }*/
+        }
         mc_sip(SIP_SSIP);
-    } else if(scause == 0x8000000000000009UL)
-    {
+    } else if(scause == 0x8000000000000009UL) {
         // interrupt: yes, cause code: supervisor external interrupt (console)
         console_handler();
+    } else if(0x0000000000000002UL) {
+        printStringSys("\n SCAUSE: ");
+        printIntSys(scause);
+        printStringSys(" (ilegalna instrukcija) \n");
     } else {
         // unexpected trap cause (trebalo bi da ispisemo scause na terminal, stval i sepc)
-        printString("\n SCAUSE: ");
-        printInt(scause);
-        printString("\n STVAL: ");
-        printInt(r_stval());
-        printString("\n SEPC: ");
-        printInt(r_sepc());
-        printString("\n");
+        printStringSys("\n SCAUSE: ");
+        printIntSys(scause);
+        printStringSys("\n STVAL: ");
+        printIntSys(r_stval());
+        printStringSys("\n SEPC: ");
+        printIntSys(r_sepc());
+        printStringSys("\n");
     }
 
     /*

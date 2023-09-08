@@ -130,6 +130,11 @@ int sem_signal(sem_t id) //0x24
     return retValue;
 }
 
+int time_sleep(time_t)
+{
+    return 0;
+}
+
 char getc()
 {
     __asm__ volatile("li a0, 65"); //0x41

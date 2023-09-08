@@ -35,6 +35,9 @@ public:
 
     friend class Scheduler;
     friend class Sem;
+
+    static TCB* idleThread;
+
 private:
     TCB(Body body, void* st, uint64 timeslice, void* args) :
             next(nullptr),
@@ -74,7 +77,8 @@ private:
     static void dispatch();
 
     static uint64 timeSliceCounter;
-    static uint64 constexpr TIME_SLICE = 2;
+    static uint64 constexpr TIME_SLICE = 1;
+
 };
 
 

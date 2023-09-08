@@ -44,7 +44,7 @@ uint64 TCB::timeSliceCounter = 0;
 TCB* TCB::createThread(Body body, void* stack, void* args)
 {
     TCB* t = new TCB(body, stack, TIME_SLICE, args); // nije iz syscall nego iz jezgra
-    if(body != nullptr) { Scheduler::getInstance().put(t); }
+    if(body != nullptr && t != idleThread) { Scheduler::getInstance().put(t); }
     return t;
 }
 
@@ -79,9 +79,12 @@ void TCB::yield()
 void TCB::dispatch()
 {
     TCB *old = running;
-    if(!old->isFinished()) { Scheduler::getInstance().put(old); }
+    if(!old->isFinished() && old != idleThread) { Scheduler::getInstance().put(old); }
 
     running = Scheduler::getInstance().get();
+    if (running == nullptr) {
+        running = idleThread;
+    }
 
     TCB::contextSwitch(&old->context, &running->context);
     // za prvi parametar argument ce biti prosledjen kroz a0, a za drugi kroz a1
@@ -103,3 +106,5 @@ void TCB::threadWrapper()
     //yield();//TCB::yield();
     // threadWrapper nije pozvano na obican nacin, nema gde da se vrati
 }
+
+TCB* TCB::idleThread = nullptr;

@@ -63,7 +63,10 @@ int Semaphore::signal ()
     return sem_signal(myHandle);
 }
 
-//int Thread::sleep (time_t);
+int Thread::sleep(time_t)
+{
+    return 0;
+}
 
 char Console::getc ()
 {
