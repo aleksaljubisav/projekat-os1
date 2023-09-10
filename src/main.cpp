@@ -64,11 +64,15 @@ void main()
         TCB::yield();
     }
 
+    /*
     //vracanje u sistemski rezim
     __asm__ volatile("li a0, 0xFF");
     __asm__ volatile("ecall");
     delete threads[0];
     delete threads[1];
+     */
+
+
     /*for(auto &thread: threads)
     {
         //MA::getInstance().mem_free(coroutine);

@@ -48,7 +48,8 @@ private:
                         stack!=nullptr ? (uint64)stack : 0 /// vec imam adresu na lok. nakon posl. za stek, tako da cemo to da cast-ujemo
                     }),
             timeslice(timeslice),
-            finished(false)
+            finished(false),
+            blocked(false)
     {
         //if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
         //prebacili smo u createThread
@@ -77,8 +78,9 @@ private:
     static void dispatch();
 
     static uint64 timeSliceCounter;
-    static uint64 constexpr TIME_SLICE = 1;
+    static uint64 constexpr TIME_SLICE = 2;
 
+    bool blocked;
 };
 
 

@@ -79,7 +79,9 @@ void TCB::yield()
 void TCB::dispatch()
 {
     TCB *old = running;
-    if(!old->isFinished() && old != idleThread) { Scheduler::getInstance().put(old); }
+    if(!old->isFinished() && old != idleThread && !old->blocked) {
+        Scheduler::getInstance().put(old);
+    }
 
     running = Scheduler::getInstance().get();
     if (running == nullptr) {

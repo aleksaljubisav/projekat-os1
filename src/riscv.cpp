@@ -23,6 +23,7 @@ void Riscv::popSppSpie()
 void Riscv::handleSupervisorTrap()
 {
     uint64 scause = r_scause();
+    uint64 volatile sstatus = r_sstatus();
     if(scause == 0x0000000000000008UL) {
         // interrupt: no, cause code: environment call from U-mode (8)
         uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
@@ -89,16 +90,16 @@ void Riscv::handleSupervisorTrap()
             }
         } else if(kod == 0x12) //18 to je thread_exit
         {
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
             TCB::running->setFinished(true);
             TCB::dispatch();
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         } else if(kod == 0x13) //19 to je thread_dispatch
         {
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
 
         } else if(kod == 0x21) // sem_open
         {
@@ -126,46 +127,46 @@ void Riscv::handleSupervisorTrap()
 
         } else if(kod == 0x23) // sem_wait
         {
-            uint64 sstatus = r_sstatus();
-            Sem** id;
+            //uint64 sstatus = r_sstatus();
+            Sem* id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
-            (*id)->wait(); //treba da vrati 0 ili negativnu vrednost
+            (id)->wait(); //treba da vrati 0 ili negativnu vrednost
 
             int provera = 0;
             __asm__ volatile("mv a0, %0": : "r" (provera));
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         } else if(kod == 0x24) // sem_signal
         {
-            uint64 sstatus = r_sstatus();
-            Sem** id;
+            //uint64 sstatus = r_sstatus();
+            Sem* id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
-            (*id)->signal(); //treba da vrati 0 ili negativnu vrednost
+            (id)->signal(); //treba da vrati 0 ili negativnu vrednost
 
             int provera = 0;
             __asm__ volatile("mv a0, %0": : "r" (provera));
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         } else if(kod == 0x41) // char getc();
         {
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
 
             char ret = __getc();
 
             __asm__ volatile("mv a0, %0": : "r" (ret));
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         } else if(kod == 0x42) // void put(char);
         {
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
             char c;
             __asm__ volatile("mv %0, a1" : "=r" (c));
 
             __putc(c);
 
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {
-            Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
+            //Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
 
         } else { // Yield iz U-mode
             /*printString("\n Yield, a ne thread_dispatch() \n SCAUSE: ");
@@ -175,10 +176,10 @@ void Riscv::handleSupervisorTrap()
             printString("\n SEPC: ");
             printInt(r_sepc());
             printString("\n");*/
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
         }
         w_sepc(sepc);
     } else if(scause == 0x0000000000000009UL) // Yield iz S-mode
@@ -188,10 +189,10 @@ void Riscv::handleSupervisorTrap()
 
         // sepc dobija vrednost SAME ECALL INSTRUKCIJE!!!
         uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
-        uint64 sstatus = r_sstatus();
+        //uint64 sstatus = r_sstatus();
         TCB::timeSliceCounter = 0;
         TCB::dispatch();
-        w_sstatus(sstatus);
+        //w_sstatus(sstatus);
         w_sepc(sepc);
     } else if(scause == 0x8000000000000001UL)
     {
@@ -201,18 +202,18 @@ void Riscv::handleSupervisorTrap()
         if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
             uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
-            uint64 sstatus = r_sstatus();
+            //uint64 sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
             // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
-            w_sstatus(sstatus);
+            //w_sstatus(sstatus);
             w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
         }
         mc_sip(SIP_SSIP);
     } else if(scause == 0x8000000000000009UL) {
         // interrupt: yes, cause code: supervisor external interrupt (console)
         console_handler();
-    } else if(0x0000000000000002UL) {
+    } else if(scause == 0x0000000000000002UL) {
         printStringSys("\n SCAUSE: ");
         printIntSys(scause);
         printStringSys(" (ilegalna instrukcija) \n");
@@ -226,7 +227,7 @@ void Riscv::handleSupervisorTrap()
         printIntSys(r_sepc());
         printStringSys("\n");
     }
-
+    w_sstatus(sstatus);
     /*
     if(scause == 0x0000000000000008UL)
     {
