@@ -130,9 +130,14 @@ int sem_signal(sem_t id) //0x24
     return retValue;
 }
 
-int time_sleep(time_t)
+int time_sleep(time_t time) //0x31
 {
-    return 0;
+    __asm__ volatile("mv a1, %0" : : "r" (time));
+    __asm__ volatile("li a0, 49");
+    __asm__ volatile("ecall");
+    int retValue;
+    __asm__ volatile("mv %0, a0" : "=r" (retValue));
+    return retValue;
 }
 
 char getc()

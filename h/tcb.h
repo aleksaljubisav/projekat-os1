@@ -8,6 +8,7 @@
 #include "../lib/hw.h"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/scheduler.h"
+#include "../h/SleepList.h"
 //class Scheduler;
 
 // Thread Control Block
@@ -35,6 +36,7 @@ public:
 
     friend class Scheduler;
     friend class Sem;
+    friend class SleepList;
 
     static TCB* idleThread;
 
@@ -49,7 +51,11 @@ private:
                     }),
             timeslice(timeslice),
             finished(false),
-            blocked(false)
+            nextSleep(nullptr),
+            prevSleep(nullptr),
+            blocked(false),
+            sleeping(false),
+            sleepTime(0)
     {
         //if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
         //prebacili smo u createThread
@@ -77,10 +83,16 @@ private:
 
     static void dispatch();
 
+    static int sleep(time_t time);
+    TCB* nextSleep; //za listu uspavanih niti
+    TCB* prevSleep;
+
     static uint64 timeSliceCounter;
-    static uint64 constexpr TIME_SLICE = 2;
+    static uint64 constexpr TIME_SLICE = DEFAULT_TIME_SLICE;
 
     bool blocked;
+    bool sleeping;
+    time_t sleepTime;
 };
 
 

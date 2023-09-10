@@ -139,7 +139,7 @@ void Riscv::handleSupervisorTrap()
         } else if(kod == 0x24) // sem_signal
         {
             //uint64 sstatus = r_sstatus();
-            Sem* id;
+            Sem *id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
             (id)->signal(); //treba da vrati 0 ili negativnu vrednost
@@ -147,6 +147,13 @@ void Riscv::handleSupervisorTrap()
             int provera = 0;
             __asm__ volatile("mv a0, %0": : "r" (provera));
             //w_sstatus(sstatus);
+        } else if(kod == 0x31) //49 time_sleep()
+        {
+            time_t time;
+            __asm__ volatile("mv %0, a1" : "=r" (time));
+
+            int ret = TCB::sleep(time);
+            __asm__ volatile("mv a0, %0" : : "r" (ret));
         } else if(kod == 0x41) // char getc();
         {
             //uint64 sstatus = r_sstatus();
@@ -198,6 +205,11 @@ void Riscv::handleSupervisorTrap()
     {
         // interrupt: yes, cause code: supervisor software interrupt (timer)
         TCB::timeSliceCounter++;
+        if(SleepList::getInstance().getSleepQueueHead()) {
+            SleepList::getInstance().getSleepQueueHead()->sleepTime--;
+            if (SleepList::getInstance().getSleepQueueHead()->sleepTime <= 0)
+                SleepList::getInstance().wakeSleeping();
+        }
 
         if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
@@ -209,6 +221,7 @@ void Riscv::handleSupervisorTrap()
             //w_sstatus(sstatus);
             w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
         }
+
         mc_sip(SIP_SSIP);
     } else if(scause == 0x8000000000000009UL) {
         // interrupt: yes, cause code: supervisor external interrupt (console)

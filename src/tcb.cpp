@@ -79,7 +79,7 @@ void TCB::yield()
 void TCB::dispatch()
 {
     TCB *old = running;
-    if(!old->isFinished() && old != idleThread && !old->blocked) {
+    if(!old->isFinished() && old != idleThread && !old->blocked && !old->sleeping) {
         Scheduler::getInstance().put(old);
     }
 
@@ -90,6 +90,18 @@ void TCB::dispatch()
 
     TCB::contextSwitch(&old->context, &running->context);
     // za prvi parametar argument ce biti prosledjen kroz a0, a za drugi kroz a1
+}
+
+int TCB::sleep(time_t time)
+{
+    TCB* old = TCB::running;
+    old->sleepTime = time;
+    if(old->sleeping == true) return 0;
+    SleepList::getInstance().putSleeping(old);
+
+    TCB::dispatch();
+
+    return 0;
 }
 
 void TCB::threadWrapper()
