@@ -86,6 +86,13 @@ void thread_dispatch()
     __asm__ volatile("ecall");
 }
 
+void thread_join(thread_t handle)
+{
+    __asm__ volatile("mv a1, %0" : : "r" (handle));
+    __asm__ volatile("li a0, 20"); //0x14
+    __asm__ volatile("ecall");
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -132,6 +139,7 @@ int sem_signal(sem_t id) //0x24
 
 int time_sleep(time_t time) //0x31
 {
+    if(time == 0) return 0;
     __asm__ volatile("mv a1, %0" : : "r" (time));
     __asm__ volatile("li a0, 49");
     __asm__ volatile("ecall");

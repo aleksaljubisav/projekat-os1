@@ -33,6 +33,8 @@ void thread_delete_only(thread_t* handle);
 int thread_exit (); // 0x12
 void thread_dispatch(); //kod 0x13
 
+void thread_join(thread_t handle); //kod 0x14d
+
 class Sem;
 typedef Sem* sem_t;
 

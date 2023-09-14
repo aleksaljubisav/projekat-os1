@@ -7,6 +7,7 @@
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
 #include "../test/printing.hpp"
+#include "../h/printingSys.h"
 
 typedef MemoryAllocator MA;
 
@@ -58,6 +59,12 @@ int TCB::scheduleThreadOnly(TCB* t)
     return -1;
 }
 
+void TCB::join(TCB* thr)
+{
+    while( !( (thr)->isFinished() ) ) {
+        dispatch();
+    }
+}
 
 // extern "C" void pushRegisters();
     // tako mozemo da uvezemo ove funkcije
@@ -78,6 +85,7 @@ void TCB::yield()
 
 void TCB::dispatch()
 {
+    timeSliceCounter = 0;
     TCB *old = running;
     if(!old->isFinished() && old != idleThread && !old->blocked && !old->sleeping) {
         Scheduler::getInstance().put(old);
@@ -96,7 +104,6 @@ int TCB::sleep(time_t time)
 {
     TCB* old = TCB::running;
     old->sleepTime = time;
-    if(old->sleeping == true) return 0;
     SleepList::getInstance().putSleeping(old);
 
     TCB::dispatch();

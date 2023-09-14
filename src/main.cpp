@@ -36,12 +36,12 @@ void wrapperUserMain(void* arg)
     userMain();
 }
 
-static void idleThreadBody(void* arg)
+/*static void idleThreadBody(void* arg)
 {
     while (true) {
         //printStringSys("O");
     }
-}
+}*/
 
 void main()
 {
@@ -56,13 +56,15 @@ void main()
     threads[1] = TCB::createThread(wrapperUserMain, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
     printStringSys("Thread userMain created\n");
 
-    TCB* idle = TCB::createThread(idleThreadBody, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
-    TCB::idleThread = idle;
+    //TCB* idle = TCB::createThread(idleThreadBody, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
+    //TCB::idleThread = idle;
 
-    while(!(threads[1]->isFinished()))
-    {
-        TCB::yield();
-    }
+    threads[0]->join(threads[1]);
+
+                    /*while(!(threads[1]->isFinished()))
+                    {
+                        TCB::yield();
+                    }*/
 
     /*
     //vracanje u sistemski rezim

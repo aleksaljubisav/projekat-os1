@@ -26,7 +26,7 @@ void Riscv::handleSupervisorTrap()
     uint64 volatile sstatus = r_sstatus();
     if(scause == 0x0000000000000008UL) {
         // interrupt: no, cause code: environment call from U-mode (8)
-        uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
+        uint64 volatile sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
         uint64 kod;
         __asm__ volatile("mv %0, a0" : "=r" (kod));
         if (kod == 0x01) {
@@ -97,10 +97,15 @@ void Riscv::handleSupervisorTrap()
         } else if(kod == 0x13) //19 to je thread_dispatch
         {
             //uint64 sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
+                                //TCB::timeSliceCounter = 0;
             TCB::dispatch();
             //w_sstatus(sstatus);
+        } else if(kod == 0x14)
+        {
+            TCB* handle;
+            __asm__ volatile("mv %0, a1" : "=r" (handle));
 
+            TCB::running->join(handle);
         } else if(kod == 0x21) // sem_open
         {
             Sem** handle;
@@ -184,7 +189,7 @@ void Riscv::handleSupervisorTrap()
             printInt(r_sepc());
             printString("\n");*/
             //uint64 sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
+                                            //TCB::timeSliceCounter = 0;
             TCB::dispatch();
             //w_sstatus(sstatus);
         }
@@ -195,34 +200,37 @@ void Riscv::handleSupervisorTrap()
         // slicno kao i za prekid od tajmera, samo sto je ovo za yield
 
         // sepc dobija vrednost SAME ECALL INSTRUKCIJE!!!
-        uint64 sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
+        uint64 volatile sepc = r_sepc() + 4; //sve instrukcije su 4 bajta, pa ne treba da se vratimo na ecall, nego na instr. iza njega
         //uint64 sstatus = r_sstatus();
-        TCB::timeSliceCounter = 0;
+                                            //TCB::timeSliceCounter = 0;
         TCB::dispatch();
         //w_sstatus(sstatus);
         w_sepc(sepc);
     } else if(scause == 0x8000000000000001UL)
     {
+        uint64 volatile sepc = r_sepc();
         // interrupt: yes, cause code: supervisor software interrupt (timer)
-        TCB::timeSliceCounter++;
+        //TCB::timeSliceCounter++;
+
         if(SleepList::getInstance().getSleepQueueHead()) {
             SleepList::getInstance().getSleepQueueHead()->sleepTime--;
-            if (SleepList::getInstance().getSleepQueueHead()->sleepTime <= 0)
+            if (SleepList::getInstance().getSleepQueueHead()->sleepTime == 0)
                 SleepList::getInstance().wakeSleeping();
         }
 
-        if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
+        /*if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
-            uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
+            //uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
             //uint64 sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
+                                            //TCB::timeSliceCounter = 0;
             TCB::dispatch();
             // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
             //w_sstatus(sstatus);
-            w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
-        }
+            //w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
+        }*/
 
         mc_sip(SIP_SSIP);
+        w_sepc(sepc);
     } else if(scause == 0x8000000000000009UL) {
         // interrupt: yes, cause code: supervisor external interrupt (console)
         console_handler();

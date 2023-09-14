@@ -27,7 +27,7 @@ void SleepList::wakeSleeping()
         cur->sleeping = false;
         Scheduler::getInstance().put(cur);
 
-        cur = cur->nextSleep;
+        cur = sleepQueueHead;
     } while(cur && cur->sleepTime == 0); //&& cur->nextSleep!=nullptr
 }
 
@@ -41,11 +41,13 @@ void SleepList::putSleeping(TCB *tcb)
     TCB* cur = sleepQueueHead;
     if(!sleepQueueHead || tcb->sleepTime < sleepQueueHead->sleepTime)
         cur = nullptr;
-    else
-        for(; cur->nextSleep!=nullptr && tcb->sleepTime > cur->sleepTime; cur = cur->nextSleep)
+    else {
+        tcb->sleepTime -= cur->sleepTime;
+        for(; cur->nextSleep && tcb->sleepTime > cur->nextSleep->sleepTime; cur = cur->nextSleep)
         {
-            tcb->sleepTime -= cur->sleepTime;
+            tcb->sleepTime -= cur->nextSleep->sleepTime;
         }
+    }
     tcb->prevSleep = cur;
     if(cur) tcb->nextSleep = cur->nextSleep;
     else tcb->nextSleep = sleepQueueHead;

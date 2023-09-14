@@ -34,6 +34,11 @@ int Thread::start ()
     return thread_schedule_only(&myHandle);
 }
 
+void Thread::join()
+{
+    thread_join(myHandle);
+}
+
 void Thread::threadWrapper(/*thread_t* handle, void (*body)(void*),*/ void* arg)
 {
     ((Thread*)arg)->run();
@@ -63,9 +68,9 @@ int Semaphore::signal ()
     return sem_signal(myHandle);
 }
 
-int Thread::sleep(time_t)
+int Thread::sleep(time_t time)
 {
-    return 0;
+    return time_sleep(time);
 }
 
 char Console::getc ()

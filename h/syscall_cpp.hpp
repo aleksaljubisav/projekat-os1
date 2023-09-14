@@ -15,6 +15,9 @@ public:
     Thread (void (*body)(void*), void* arg);
     virtual ~Thread ();
     int start ();
+
+    void join();
+
     static void dispatch ();
     static int sleep (time_t);
 protected:

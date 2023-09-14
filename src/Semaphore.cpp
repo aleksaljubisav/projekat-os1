@@ -22,18 +22,7 @@ void Sem::block () {
         put(old); //stavljamo u blocked queue
 
         TCB::dispatch();
-        //TCB::yield(); mislim da ne moze yield
 
-        /*
-        TCB *old = TCB::running;
-        put(old); //stavljamo u blocked queue
-
-        TCB::running = Scheduler::getInstance().get();
-        if (TCB::running == nullptr) {
-            TCB::running = TCB::idleThread;
-        }
-        TCB::contextSwitch(&old->context, &TCB::running->context);
-         */
 }
 void Sem::unblock () {
     TCB* t = get();
@@ -41,7 +30,9 @@ void Sem::unblock () {
     Scheduler::getInstance().put(t);
 }
 void Sem::wait () {
-    if (--val<0) block();
+    if (--val<0) {
+        block();
+    }
 }
 void Sem::signal () {
     if (++val<=0) unblock();
@@ -70,3 +61,18 @@ void Sem::put(TCB *ccb)
     }
 
 }
+
+
+//Iz block je bilo:
+//TCB::yield(); mislim da ne moze yield
+
+/*
+TCB *old = TCB::running;
+put(old); //stavljamo u blocked queue
+
+TCB::running = Scheduler::getInstance().get();
+if (TCB::running == nullptr) {
+    TCB::running = TCB::idleThread;
+}
+TCB::contextSwitch(&old->context, &TCB::running->context);
+ */

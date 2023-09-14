@@ -31,6 +31,7 @@ public:
     static int scheduleThreadOnly(TCB* t);
 
     static void yield();
+    void join(TCB* thr);
 
     static TCB* running;
 
@@ -43,6 +44,7 @@ public:
 private:
     TCB(Body body, void* st, uint64 timeslice, void* args) :
             next(nullptr),
+            nextBlocked(nullptr),
             body(body),
             args(args),
             stack((uint64*)st), // pok. na posl. lok. (tehnicki na lok. nakon posl. za stek), u asembleru -8, a u C++-u -1 i onda se stavi elem
@@ -62,6 +64,7 @@ private:
     }
 
     TCB* next;
+    TCB* nextBlocked;
 
     struct Context //kontekst korutine treba da budu svi registri procesora koje je korutina potencijalno mogla da koristi
     {
