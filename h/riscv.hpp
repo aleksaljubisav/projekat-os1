@@ -83,10 +83,18 @@ public:
     // write register sstatus
     static void w_sstatus(uint64 sstatus);
 
+    // jumpTable za vektorski rezim
+    static void jumpTable();
+
     // supervisor trap
-    static void supervisorTrap();
+    static void supervisorTrap(); //za obican rezim sa if-ovima
 
 private:
+
+    //handleri za vektorski rezim
+    static void hExcAndEcall();
+    static void hInterruptTimer();
+    static void hInterruptHardware();
 
     // supervisor trap handler
     static void handleSupervisorTrap();

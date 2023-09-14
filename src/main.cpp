@@ -45,7 +45,8 @@ void wrapperUserMain(void* arg)
 
 void main()
 {
-    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+    Riscv::w_stvec((uint64) &Riscv::jumpTable | 1);
+    //Riscv::w_stvec((uint64) &Riscv::supervisorTrap | 1);
     //Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     TCB* threads[2];
