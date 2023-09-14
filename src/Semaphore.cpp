@@ -34,8 +34,9 @@ void Sem::wait () {
         block();
     }
 }
-void Sem::signal () {
+int Sem::signal () {
     if (++val<=0) unblock();
+    return 0;
 }
 
 TCB *Sem::get()
@@ -43,17 +44,17 @@ TCB *Sem::get()
     if(!blockedQueueHead) { return nullptr; }
 
     TCB* cur = blockedQueueHead;
-    blockedQueueHead = blockedQueueHead->next;
+    blockedQueueHead = blockedQueueHead->nextBlocked;
     if(!blockedQueueHead) { blockedQueueTail = nullptr; }
 
-    cur->next = nullptr;/////////naknadno sam dodao
+    cur->nextBlocked = nullptr;/////////naknadno sam dodao
     return cur;
 }
 void Sem::put(TCB *ccb)
 {
     if(blockedQueueTail)
     {
-        blockedQueueTail->next = ccb;
+        blockedQueueTail->nextBlocked = ccb;
         blockedQueueTail = ccb;
     } else
     {

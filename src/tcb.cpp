@@ -92,7 +92,8 @@ void TCB::dispatch()
     }
 
     running = Scheduler::getInstance().get();
-    if (running == nullptr) {
+
+    if (running == nullptr || running == old) {
         running = idleThread;
     }
 

@@ -26,9 +26,9 @@ public:
 
 private:
     // Skriveni konstruktor
-    SleepList() : sleepQueueHead(nullptr) {}
+    SleepList() {}
 
-    TCB* sleepQueueHead; //= nullptr;
+    static TCB* sleepQueueHead; //= nullptr;
 };
 
 

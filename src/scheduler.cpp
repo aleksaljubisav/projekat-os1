@@ -38,3 +38,7 @@ void Scheduler::put(TCB *ccb)
     }
 }
 
+TCB *Scheduler::getReadyQueueHead() const {
+    return readyQueueHead;
+}
+

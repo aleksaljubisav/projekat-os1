@@ -12,6 +12,8 @@ SleepList& SleepList::getInstance()
     return instance;
 }
 
+TCB* SleepList::sleepQueueHead = nullptr;
+
 // Remove first and all who have 0 time
 void SleepList::wakeSleeping()
 {
@@ -40,8 +42,9 @@ void SleepList::putSleeping(TCB *tcb)
 
     TCB* cur = sleepQueueHead;
     if(!sleepQueueHead || tcb->sleepTime < sleepQueueHead->sleepTime)
+    {
         cur = nullptr;
-    else {
+    } else {
         tcb->sleepTime -= cur->sleepTime;
         for(; cur->nextSleep && tcb->sleepTime > cur->nextSleep->sleepTime; cur = cur->nextSleep)
         {
@@ -55,5 +58,7 @@ void SleepList::putSleeping(TCB *tcb)
     if(tcb->nextSleep) tcb->nextSleep->prevSleep = tcb;
     if(cur) cur->nextSleep = tcb;
     else sleepQueueHead = tcb;
+
+    if(tcb->nextSleep) tcb->nextSleep->sleepTime -= tcb->sleepTime;
 
 }

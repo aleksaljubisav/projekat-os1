@@ -21,7 +21,7 @@ public:
     as it results in better error messages      */
     Scheduler(Scheduler const&) = delete;
     void operator=(Scheduler const&) = delete;
-
+    TCB *getReadyQueueHead() const;
 private:
     // Skriveni konstruktor
     Scheduler() : readyQueueHead(nullptr), readyQueueTail(nullptr) {}

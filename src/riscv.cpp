@@ -148,9 +148,9 @@ void Riscv::hExcAndEcall()
             Sem *id;
             __asm__ volatile("mv %0, a1" : "=r" (id));
 
-            (id)->signal(); //treba da vrati 0 ili negativnu vrednost
+            int provera = (id)->signal(); //treba da vrati 0 ili negativnu vrednost
 
-            int provera = 0;
+
             __asm__ volatile("mv a0, %0": : "r" (provera));
             //w_sstatus(sstatus);
         } else if(kod == 0x31) //49 time_sleep()
@@ -230,15 +230,15 @@ void Riscv::hInterruptTimer()
     uint64 volatile sepc = r_sepc();
 
     // interrupt: yes, cause code: supervisor software interrupt (timer)
-    //TCB::timeSliceCounter++;
+    TCB::timeSliceCounter++;
 
     if(SleepList::getInstance().getSleepQueueHead()) {
         SleepList::getInstance().getSleepQueueHead()->sleepTime--;
-        if (SleepList::getInstance().getSleepQueueHead()->sleepTime == 0)
+        if (SleepList::getInstance().getSleepQueueHead()->sleepTime <= 0)
             SleepList::getInstance().wakeSleeping();
     }
 
-    /*if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
+    if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
     {
         //uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
         //uint64 sstatus = r_sstatus();
@@ -247,7 +247,7 @@ void Riscv::hInterruptTimer()
         // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
         //w_sstatus(sstatus);
         //w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
-    }*/
+    }
 
     mc_sip(SIP_SSIP);
 

@@ -17,7 +17,7 @@ public:
 
     Sem (unsigned init=1) : val(init), blockedQueueHead(nullptr), blockedQueueTail(nullptr) {}
     void wait ();
-    void signal ();
+    int signal ();
     int value () const { return val; }
     TCB *get();
     void put(TCB *ccb);
