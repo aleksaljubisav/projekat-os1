@@ -3,3 +3,10 @@
 //
 
 #include "../h/Console.hpp"
+
+// Singleton getter
+Console& Console::getInstance()
+{
+    static Console instance;
+    return instance;
+}

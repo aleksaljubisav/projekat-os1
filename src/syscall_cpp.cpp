@@ -73,6 +73,13 @@ int Thread::sleep(time_t time)
     return time_sleep(time);
 }
 
+PeriodicThread::PeriodicThread(time_t period) : period(period) {}
+
+void PeriodicThread::terminate()
+{
+    period = 0;
+}
+
 char Console::getc ()
 {
     return ::getc();

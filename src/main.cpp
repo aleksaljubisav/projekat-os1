@@ -10,6 +10,7 @@
 
 typedef MemoryAllocator MA;
 extern void userMain();
+extern void userMain1();
 /*
 inline void ispisiListe()
 {
@@ -31,6 +32,11 @@ inline void ispisiListe()
 
 }
 */
+void wrapperUserMain1(void* arg)
+{
+    userMain1();
+}
+
 void wrapperUserMain(void* arg)
 {
     userMain();
@@ -39,7 +45,7 @@ void wrapperUserMain(void* arg)
 static void idleThreadBody(void* arg)
 {
     while (true) {
-        //printStringSys("O");
+        //printStringSys("/");
     }
 }
 

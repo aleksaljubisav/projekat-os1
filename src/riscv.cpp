@@ -260,14 +260,15 @@ void Riscv::hInterruptHardware()
     uint64 volatile sstatus = r_sstatus();
     uint64 volatile sepc = r_sepc();
 
-    console_handler();
+   console_handler();
 
     w_sepc(sepc);
     w_sstatus(sstatus);
 }
 
+
 void Riscv::handleSupervisorTrap()
-{
+{/*
     uint64 scause = r_scause();
     uint64 volatile sstatus = r_sstatus();
     if(scause == 0x0000000000000008UL) {
@@ -427,13 +428,13 @@ void Riscv::handleSupervisorTrap()
             //Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
 
         } else { // Yield iz U-mode
-            /*printString("\n Yield, a ne thread_dispatch() \n SCAUSE: ");
+            *printString("\n Yield, a ne thread_dispatch() \n SCAUSE: ");
             printInt(scause);
             printString("\n STVAL: ");
             printInt(r_stval());
             printString("\n SEPC: ");
             printInt(r_sepc());
-            printString("\n");*/
+            printString("\n");*
             //uint64 sstatus = r_sstatus();
                                             //TCB::timeSliceCounter = 0;
             TCB::dispatch();
@@ -464,7 +465,7 @@ void Riscv::handleSupervisorTrap()
                 SleepList::getInstance().wakeSleeping();
         }
 
-        /*if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
+        *if(TCB::timeSliceCounter >= TCB::running->getTimeslice())
         {
             //uint64 sepc = r_sepc(); // u sepc se vraca prekidna rutina
             //uint64 sstatus = r_sstatus();
@@ -473,7 +474,7 @@ void Riscv::handleSupervisorTrap()
             // prvi put kad se nit izvrsava, necemo nastavljati ovuda, zbog toga u popSppSpie ima sret
             //w_sstatus(sstatus);
             //w_sepc(sepc); // nova nit je nekad pre sacuvala svoje sepc
-        }*/
+        }*
 
         mc_sip(SIP_SSIP);
         w_sepc(sepc);
@@ -495,7 +496,7 @@ void Riscv::handleSupervisorTrap()
         printStringSys("\n");
     }
     w_sstatus(sstatus);
-    /*
+    *
     if(scause == 0x0000000000000008UL)
     {
         // interrupt: no, cause code: environment call from U-mode (8)
@@ -519,5 +520,5 @@ void Riscv::handleSupervisorTrap()
             __asm__ volatile("mv a0, %0" : : "r" (retValue));
         }
     }
-    */
-}
+    *
+*/}
