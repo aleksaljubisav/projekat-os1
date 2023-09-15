@@ -138,6 +138,7 @@ TCB* TCB::idleThread = nullptr;
 void TCB::kProducer(void* arg) //za putc
 {
     while(true) {
+
         while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
         {
             //upisi u data registar konzole

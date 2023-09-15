@@ -179,6 +179,10 @@ void Riscv::hExcAndEcall()
             Con::getInstance().putc(c);
 
             //w_sstatus(sstatus);
+        } else if(kod == 0xFE) // vracanje u sistemski rezim na kraju main-a
+        {
+            //Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
+
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {
             //Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
