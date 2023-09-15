@@ -13,6 +13,7 @@ void* Sem::operator new(size_t size)
 }
 void Sem::operator delete(void* p) noexcept
 {
+    //deblokirati sve niti
     MemoryAllocator::getInstance().mem_free(p);
 }
 

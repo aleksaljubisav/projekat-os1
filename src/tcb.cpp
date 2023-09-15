@@ -8,6 +8,7 @@
 #include "../h/syscall_c.h"
 #include "../test/printing.hpp"
 #include "../h/printingSys.h"
+#include "../h/Console.hpp"
 
 typedef MemoryAllocator MA;
 
@@ -119,6 +120,7 @@ void TCB::threadWrapper()
     // Ovde smo jos uvek u prekidnoj rutini, tako da
     // mora pop nekih stvari iz statusnog registra:
     //  SPP, SPIE
+    //if(running->priv == false)
     Riscv::popSppSpie();// MORA CALL INSTRUKCIJOM JER MENJA REGISTAR ra
 
     //sve ispod popSppSpie je user rezim
@@ -132,3 +134,15 @@ void TCB::threadWrapper()
 }
 
 TCB* TCB::idleThread = nullptr;
+
+void TCB::kProducer(void* arg) //za putc
+{
+    while(true) {
+        while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
+        {
+            //upisi u data registar konzole
+            char chr = Con::getInstance().outBuffer->get();
+            *((char*)CONSOLE_TX_DATA) = chr;
+        }
+    }
+}

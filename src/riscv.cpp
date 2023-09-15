@@ -4,12 +4,14 @@
 
 #include "../h/riscv.hpp"
 #include "../h/MemoryAllocator.hpp"
-#include "../lib/console.h"
+//#include "../lib/console.h"
 #include "../h/tcb.h"
 //#include "../h/print.hpp"
 #include "../h/printingSys.h"
 #include "../h/syscall_c.h"
 #include "../h/Semaphore.h"
+#include "../h/kBuffer.hpp"
+#include "../h/Console.hpp"
 
 
 void Riscv::popSppSpie()
@@ -126,7 +128,7 @@ void Riscv::hExcAndEcall()
             Sem** handle;
             __asm__ volatile("mv %0, a1" : "=r" (handle));
 
-            delete *handle; //JA MISLIM DA U DESKRIPTORU TREBAJU SVE NITI DA SE DEBLOKIRAJU
+            delete *handle; //JA MISLIM DA U DESKRIPTORU TREBAJU SVE NITI DA SE DEBLOKIRAJU (destruktoru)
 
             int provera = 0;
             __asm__ volatile("mv a0, %0": : "r" (provera));
@@ -164,7 +166,7 @@ void Riscv::hExcAndEcall()
         {
             //uint64 sstatus = r_sstatus();
 
-            char ret = __getc();
+            char ret = Con::getInstance().getc();
 
             __asm__ volatile("mv a0, %0": : "r" (ret));
             //w_sstatus(sstatus);
@@ -174,7 +176,7 @@ void Riscv::hExcAndEcall()
             char c;
             __asm__ volatile("mv %0, a1" : "=r" (c));
 
-            __putc(c);
+            Con::getInstance().putc(c);
 
             //w_sstatus(sstatus);
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
@@ -260,7 +262,34 @@ void Riscv::hInterruptHardware()
     uint64 volatile sstatus = r_sstatus();
     uint64 volatile sepc = r_sepc();
 
-   console_handler();
+    int brPrekida = plic_claim();
+    if(brPrekida == CONSOLE_IRQ) //10 iliti 0x0A
+    {
+        /*while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
+        {
+            //upisi u data registar konzole
+            char chr = Con::getInstance().outBuffer->get();
+            *((char*)CONSOLE_TX_DATA) = chr;
+        }*/
+
+        while ((CONSOLE_RX_STATUS_BIT & *((char*)CONSOLE_STATUS)))
+        {
+            //upisi u data registar konzole
+            char chr = *((char*)CONSOLE_RX_DATA);
+            Con::getInstance().inBuffer->put(chr);
+        }
+
+        plic_complete(brPrekida);
+
+    } else {
+        printStringSys("\n PLIC_CLAIM: ");
+        printIntSys(brPrekida);
+        printStringSys("\n STVAL: ");
+        printIntSys(r_stval());
+        printStringSys("\n SEPC: ");
+        printIntSys(r_sepc());
+        printStringSys("\n");
+    }
 
     w_sepc(sepc);
     w_sstatus(sstatus);

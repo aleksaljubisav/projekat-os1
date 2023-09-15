@@ -3,6 +3,7 @@
 //
 
 #include "../h/printingSys.h"
+#include "../h/Console.hpp"
 
 //uint64 lockPrint = 0;
 
@@ -14,7 +15,7 @@ void printStringSys(char const *string)
     //LOCK();
     while (*string != '\0')
     {
-        __putc(*string);
+        Con::getInstance().putc(*string);
         string++;
     }
     //UNLOCK();
@@ -26,7 +27,7 @@ char* getStringSys(char *buf, int max) {
     char c;
 
     for(i=0; i+1 < max; ){
-        cc = __getc();
+        cc = Con::getInstance().getc();
         if(cc < 1)
             break;
         c = cc;
@@ -74,7 +75,7 @@ void printIntSys(int xx, int base, int sgn)
         buf[i++] = '-';
 
     while(--i >= 0)
-        __putc(buf[i]);
+        Con::getInstance().putc(buf[i]);
 
     //UNLOCK();
 }

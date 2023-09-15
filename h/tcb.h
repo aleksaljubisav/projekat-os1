@@ -40,6 +40,7 @@ public:
     friend class SleepList;
 
     static TCB* idleThread;
+    static void kProducer(void* arg);
 
 private:
     TCB(Body body, void* st, uint64 timeslice, void* args) :
@@ -61,6 +62,8 @@ private:
     {
         //if(body != nullptr) { Scheduler::getInstance().put(this); } // u dispatchu ce da ubaci main u scheduler, ne treba mi da ubacujemo ovde
         //prebacili smo u createThread
+        //if(body == kProducer) priv = true;
+        //else priv = false;
     }
 
     TCB* next;
@@ -77,6 +80,8 @@ private:
     Context context; //registre x3-x31 ne cuvamo u kontrolnoj strukturi Context, vec na samom steku ove korutine
     uint64 timeslice;
     bool finished;
+
+    //bool priv;
 
     friend class Riscv;
 
@@ -96,6 +101,7 @@ private:
     bool blocked;
     bool sleeping;
     time_t sleepTime;
+
 };
 
 

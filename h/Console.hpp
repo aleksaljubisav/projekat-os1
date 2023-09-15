@@ -5,21 +5,31 @@
 #ifndef PROJECT_BASE_REPOSITORY_PREDAJA_CONSOLE_HPP
 #define PROJECT_BASE_REPOSITORY_PREDAJA_CONSOLE_HPP
 
+#include "../h/kBuffer.hpp"
 
-class Console
+class Con
 {
 public:
-    static Console& getInstance();
+    static Con& getInstance();
 
     /*  deleted functions should generally be pubSlic
     as it results in better error messages      */
-    Console(Console const&) = delete;
-    void operator=(Console const&) = delete;
+    Con(Con const&) = delete;
+    void operator=(Con const&) = delete;
+
+    void putc(char chr);
+
+    char getc();
+
+    void initBuffers();
+    void delBuffers();
+
+    kBuffer* outBuffer = nullptr;
+    kBuffer* inBuffer = nullptr;
 
 private:
     // Skriveni konstruktor
-    Console() {}
+    Con() {}
 };
-
 
 #endif //PROJECT_BASE_REPOSITORY_PREDAJA_CONSOLE_HPP

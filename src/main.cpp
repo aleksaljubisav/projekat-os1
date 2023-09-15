@@ -7,6 +7,8 @@
 #include "../lib/hw.h"
 #include "../h/syscall_c.h"
 #include "../h/printingSys.h"
+#include "../h/kBuffer.hpp"
+#include "../h/Console.hpp"
 
 typedef MemoryAllocator MA;
 extern void userMain();
@@ -41,6 +43,18 @@ void wrapperUserMain(void* arg)
 {
     userMain();
 }
+/*
+void kProducer(void* arg) //za putc
+{
+    while(true) {
+        while (Console::outBuffer->getCnt() > 0 && (*((char*)CONSOLE_TX_STATUS_BIT) & *((char*)CONSOLE_STATUS)))
+        {
+            //upisi u data registar konzole
+            char chr = Con::outBuffer->get();
+            *((char*)CONSOLE_TX_DATA) = chr;
+        }
+    }
+}*/
 
 static void idleThreadBody(void* arg)
 {
@@ -55,6 +69,8 @@ void main()
     //Riscv::w_stvec((uint64) &Riscv::supervisorTrap | 1);
     //Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
+    Con::getInstance().initBuffers();
+
     TCB* threads[2];
 
     threads[0] = TCB::createThread(nullptr, nullptr, nullptr);
@@ -66,12 +82,15 @@ void main()
     TCB* idle = TCB::createThread(idleThreadBody, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
     TCB::idleThread = idle;
 
-    threads[0]->join(threads[1]);
+    TCB* kProd = TCB::createThread(TCB::kProducer, ((void*)((char*)MA::getInstance().mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE)), nullptr);
 
-                    /*while(!(threads[1]->isFinished()))
-                    {
-                        TCB::yield();
-                    }*/
+    threads[0]->join(threads[1]);
+    threads[0]->join(kProd);
+
+                /*while(!(threads[1]->isFinished()))
+                {
+                    TCB::yield();
+                }*/
 
     /*
     //vracanje u sistemski rezim
@@ -87,6 +106,16 @@ void main()
         //MA::getInstance().mem_free(coroutine);
         delete thread;
     }*/
+
+    while(Con::getInstance().outBuffer->getCnt() > 0) {
+        while ((*((char*)CONSOLE_TX_STATUS_BIT) & *((char*)CONSOLE_STATUS)))
+        {
+            //upisi u data registar konzole
+            char chr = Con::getInstance().outBuffer->get();
+            *((char*)CONSOLE_TX_DATA) = chr;
+        }
+    }
+    Con::getInstance().delBuffers();
 
     printStringSys("Finished\n");
 
