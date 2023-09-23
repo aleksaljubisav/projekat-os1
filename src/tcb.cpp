@@ -138,12 +138,7 @@ TCB* TCB::idleThread = nullptr;
 void TCB::kProducer(void* arg) //za putc
 {
     while(true) {
-
-        while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
-        {
-            //upisi u data registar konzole
-            char chr = Con::getInstance().outBuffer->get();
-            *((char*)CONSOLE_TX_DATA) = chr;
-        }
+        __asm__ volatile("li a0, 0xFE");
+        __asm__ volatile("ecall");
     }
 }

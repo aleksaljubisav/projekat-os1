@@ -179,9 +179,14 @@ void Riscv::hExcAndEcall()
             Con::getInstance().putc(c);
 
             //w_sstatus(sstatus);
-        } else if(kod == 0xFE) // vracanje u sistemski rezim na kraju main-a
+        } else if(kod == 0xFE)
         {
-            //Riscv::ms_sstatus(Riscv::SSTATUS_SPP);
+            while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
+            {
+                //upisi u data registar konzole
+                char chr = Con::getInstance().outBuffer->get();
+                *((char*)CONSOLE_TX_DATA) = chr;
+            }
 
         } else if(kod == 0xFF) // vracanje u sistemski rezim na kraju main-a
         {
@@ -282,9 +287,7 @@ void Riscv::hInterruptHardware()
             char chr = *((char*)CONSOLE_RX_DATA);
             Con::getInstance().inBuffer->put(chr);
         }
-
         plic_complete(brPrekida);
-
     } else {
         printStringSys("\n PLIC_CLAIM: ");
         printIntSys(brPrekida);
@@ -294,6 +297,7 @@ void Riscv::hInterruptHardware()
         printIntSys(r_sepc());
         printStringSys("\n");
     }
+
 
     w_sepc(sepc);
     w_sstatus(sstatus);

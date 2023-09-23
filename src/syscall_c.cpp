@@ -163,3 +163,5 @@ void putc(char c)
     __asm__ volatile("li a0, 66"); //0x42
     __asm__ volatile("ecall");
 }
+
+

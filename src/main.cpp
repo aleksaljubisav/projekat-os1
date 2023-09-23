@@ -96,9 +96,8 @@ void main()
     //vracanje u sistemski rezim
     __asm__ volatile("li a0, 0xFF");
     __asm__ volatile("ecall");
-    delete threads[0];
-    delete threads[1];
      */
+
 
 
     /*for(auto &thread: threads)
@@ -108,7 +107,7 @@ void main()
     }*/
 
     while(Con::getInstance().outBuffer->getCnt() > 0) {
-        while ((*((char*)CONSOLE_TX_STATUS_BIT) & *((char*)CONSOLE_STATUS)))
+        while (CONSOLE_TX_STATUS_BIT & *((char*)CONSOLE_STATUS))
         {
             //upisi u data registar konzole
             char chr = Con::getInstance().outBuffer->get();
@@ -116,6 +115,11 @@ void main()
         }
     }
     Con::getInstance().delBuffers();
+
+    delete threads[0];
+    delete threads[1];
+    delete kProd;
+    delete idle;
 
     printStringSys("Finished\n");
 

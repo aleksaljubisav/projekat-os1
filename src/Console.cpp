@@ -23,8 +23,7 @@ void Con::putc(char chr)
 char Con::getc()
 {
     //if(inBuffer->getCnt() > 0)
-    char chr = inBuffer->get();
-    return chr;
+    return inBuffer->get();
 }
 
 
